@@ -1,8 +1,8 @@
-import basic
+import tokenizer
 
 while True:
-    text = input('basic > ')
-    result, error = basic.run('<stdin>', text)
+    text = input('tokenizer > ')
+    result, error = tokenizer.run('<stdin>', text)
 
     if error: print(error.as_string())
     else: print(result)
