@@ -130,10 +130,13 @@ class Lexer:
                 tokens.append(self.make_string())
             elif self.current_char == "'":
                 tokens.append(self.make_character())
+            elif self.current_char == '#':
+                comment_token = self.make_comment()
+                if isinstance(comment_token, Error):  # Handle unclosed comment errors
+                    return [], comment_token
+                tokens.append(comment_token)
             elif self.current_char in SYMBOLS:
                 tokens.append(self.make_symbol())
-            elif self.current_char == '#':  # Comments
-                self.skip_comment()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
@@ -141,6 +144,7 @@ class Lexer:
                 return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
         
         return tokens, None
+
 
     def is_negative_sign(self):
         # Determine if '-' is part of a negative number
@@ -267,6 +271,41 @@ class Lexer:
 
         self.prev_token_type = token.type  # Update previous token type
         return token
+
+    def make_comment(self):
+        pos_start = self.pos.copy()
+
+        # Multi-line comment
+        if self.text[self.pos.idx:self.pos.idx+2] == '##':
+            comment_text = ''
+            self.advance()
+            self.advance()
+            while self.current_char is not None:
+                if self.text[self.pos.idx:self.pos.idx+2] == '##':
+                    self.advance()
+                    self.advance()
+                    return Token('COMMENT', comment_text.strip())
+                comment_text += self.current_char
+                self.advance()
+            return UnclosedStringError(pos_start, self.pos)
+
+        # Single-line comment
+        elif self.text[self.pos.idx:self.pos.idx+1] == '#':
+            comment_text = ''
+            self.advance()  # Skip first #
+            while self.current_char is not None and self.current_char != '#':
+                comment_text += self.current_char
+                self.advance()
+            if self.current_char == '#':
+                self.advance()  # Skip closing #
+                return Token('COMMENT', comment_text.strip())
+            return UnclosedStringError(pos_start, self.pos, "Unclosed single-line comment")
+
+        # If a single # is not followed by another #
+        else:
+            char = self.current_char
+            self.advance()
+            return IllegalCharError(pos_start, self.pos, f"Unexpected character '{char}' after '#'")
 
 
 
