@@ -120,32 +120,47 @@ class Lexer:
         tokens = []
 
         while self.current_char is not None:
-            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):  # Skip whitespace and escape sequences
+            # Skip whitespace (spaces, tabs, etc.)
+            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
                 self.advance()
                 if self.current_char == '\\' and self.peek() in 'tnv':  # Handle escape sequences
                     self.advance()  # Skip '\'
                     self.advance()  # Skip 't', 'n', or 'v'
-            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
-                tokens.append(self.make_number())
-            elif self.current_char in LETTERS or self.current_char == '_':
-                tokens.append(self.make_identifier_or_keyword())
-            elif self.current_char == '"':
-                tokens.append(self.make_string())
-            elif self.current_char == "'":
-                tokens.append(self.make_character())
-            elif self.current_char == '#':
+
+            # Skip comments
+            elif self.current_char == '#':  # Handle comments
                 comment_token = self.make_comment()
                 if isinstance(comment_token, Error):  # Handle unclosed comment errors
                     return [], comment_token
-                tokens.append(comment_token)
+                # Simply continue to the next iteration, ignoring the comment
+                continue  # Skip to next iteration after comment
+
+            # Handle numbers
+            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
+                tokens.append(self.make_number())
+
+            # Handle identifiers and keywords
+            elif self.current_char in LETTERS or self.current_char == '_':
+                tokens.append(self.make_identifier_or_keyword())
+
+            # Handle strings
+            elif self.current_char == '"':
+                tokens.append(self.make_string())
+
+            # Handle characters
+            elif self.current_char == "'":
+                tokens.append(self.make_character())
+
+            # Handle symbols (operators, punctuation)
             elif self.current_char in SYMBOLS:
                 tokens.append(self.make_symbol())
+
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
-        
+
         return tokens, None
 
     def peek(self):
