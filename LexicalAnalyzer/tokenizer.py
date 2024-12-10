@@ -96,7 +96,7 @@ class Token:
         self.value = value
     
     def __repr__(self):
-        if self.value: return f'{self.type}:{self.value}'
+        if self.value: return f'{self.type}: {self.value}'
         return f'{self.type}'
 
 #######################################
@@ -356,6 +356,21 @@ def run(fn, text):
 
     if error:
         return [], error.as_string()
+
+    with open("symbol_table.txt", "w") as f:
+        f.write("--------------------------------------\n")
+        f.write("|               Input                 |\n")
+        f.write("--------------------------------------\n")
+        f.write(text + "\n\n")
+        
+        f.write("--------------------------------------\n")
+        f.write("|               Tokens                |\n")
+        f.write("--------------------------------------\n")
+        for token in tokens:
+            f.write( str(token) + "\n")
+
     return tokens, None
+
+
 
 

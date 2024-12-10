@@ -1,0 +1,13 @@
+--------------------------------------
+|               Input                 |
+--------------------------------------
+String x = "hello";
+
+--------------------------------------
+|               Tokens                |
+--------------------------------------
+DATA_TYPE: String
+IDENTIFIER: x
+ASSIGNMENT_OPERATOR: =
+STRING_LITERAL: hello
+TERMINATING_SYMBOL: ;
