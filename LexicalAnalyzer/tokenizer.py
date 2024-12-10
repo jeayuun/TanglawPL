@@ -109,7 +109,7 @@ class Lexer:
         self.text = text
         self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
-        self.prev_token_type = None  # Track the type of the last token
+        self.prev_token_type = None  
         self.advance()
     
     def advance(self):
@@ -120,38 +120,29 @@ class Lexer:
         tokens = []
 
         while self.current_char is not None:
-            # Skip whitespace (spaces, tabs, etc.)
             if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
                 self.advance()
-                if self.current_char == '\\' and self.peek() in 'tnv':  # Handle escape sequences
-                    self.advance()  # Skip '\'
-                    self.advance()  # Skip 't', 'n', or 'v'
+                if self.current_char == '\\' and self.peek() in 'tnv':  
+                    self.advance() 
+                    self.advance()  
 
-            # Skip comments
             elif self.current_char == '#':  # Handle comments
                 comment_token = self.make_comment()
-                if isinstance(comment_token, Error):  # Handle unclosed comment errors
+                if isinstance(comment_token, Error):  
                     return [], comment_token
-                # Simply continue to the next iteration, ignoring the comment
-                continue  # Skip to next iteration after comment
 
-            # Handle numbers
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 tokens.append(self.make_number())
 
-            # Handle identifiers and keywords
             elif self.current_char in LETTERS or self.current_char == '_':
                 tokens.append(self.make_identifier_or_keyword())
 
-            # Handle strings
             elif self.current_char == '"':
                 tokens.append(self.make_string())
 
-            # Handle characters (including special symbols)
             elif self.current_char == "'":
                 tokens.append(self.make_character())
 
-            # Handle symbols (operators, punctuation)
             elif self.current_char in SYMBOLS:
                 tokens.append(self.make_symbol())
 
@@ -163,13 +154,11 @@ class Lexer:
 
         return tokens, None
 
-
     def peek(self):
         peek_pos = self.pos.idx + 1
         return self.text[peek_pos] if peek_pos < len(self.text) else None
 
     def is_negative_sign(self):
-        # Determine if '-' is part of a negative number
         if self.prev_token_type in ['REAL_NUMBER', 'INTEGER', 'IDENTIFIER', 'CLOSING_PARENTHESIS']:
             return False
         return True
@@ -179,7 +168,7 @@ class Lexer:
         has_decimal = False
         pos_start = self.pos.copy()
 
-        if self.current_char == '-':  # Handle negative sign
+        if self.current_char == '-':  
             num_str += self.current_char
             self.advance()
 
@@ -196,11 +185,10 @@ class Lexer:
                 token = Token('REAL_NUMBER', float(num_str))
             else:
                 token = Token('INTEGER', int(num_str))
-            self.prev_token_type = token.type  # Update previous token type
+            self.prev_token_type = token.type  
             return token
         except ValueError:
             return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
-
 
     def make_identifier_or_keyword(self):
         id_str = ''
@@ -222,16 +210,16 @@ class Lexer:
     def make_string(self):
         str_val = ''
         pos_start = self.pos.copy()
-        self.advance()  # Skip opening quote
+        self.advance()  
 
         while self.current_char is not None:
-            if self.current_char == '\\':  # Handle escape sequences
+            if self.current_char == '\\':  
                 self.advance()
                 escape_chars = {
                     'n': '\n', 't': '\t', '"': '"', "'": "'", '\\': '\\'
                 }
                 str_val += escape_chars.get(self.current_char, self.current_char)
-            elif self.current_char == '"':  # Closing quote
+            elif self.current_char == '"': 
                 self.advance()
                 return Token('STRING_LITERAL', str_val)
             else:
@@ -240,24 +228,21 @@ class Lexer:
 
         return UnclosedStringError(pos_start, self.pos)
 
-
     def make_character(self):
         pos_start = self.pos.copy()
-        self.advance()  # Skip opening single quote
+        self.advance()  
 
         if self.current_char is None or self.current_char == "'":
             return IllegalCharError(pos_start, self.pos, "Empty character literal")
 
-        char_val = self.current_char  # Capture the character
+        char_val = self.current_char  
 
-        self.advance()  # Move to the next character
-        if self.current_char != "'":  # Ensure the character literal is closed
+        self.advance()  
+        if self.current_char != "'":  
             return IllegalCharError(pos_start, self.pos, "Unclosed character literal")
 
-        self.advance()  # Skip closing single quote
+        self.advance() 
         return Token('CHARACTER_LITERAL', char_val)
-
-
 
     def make_symbol(self):
         pos_start = self.pos.copy()
@@ -294,13 +279,12 @@ class Lexer:
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  # Update previous token type
+        self.prev_token_type = token.type  
         return token
 
     def make_comment(self):
         pos_start = self.pos.copy()
 
-        # Multi-line comment
         if self.text[self.pos.idx:self.pos.idx+2] == '##':
             comment_text = ''
             self.advance()
@@ -314,25 +298,21 @@ class Lexer:
                 self.advance()
             return UnclosedStringError(pos_start, self.pos)
 
-        # Single-line comment
         elif self.text[self.pos.idx:self.pos.idx+1] == '#':
             comment_text = ''
-            self.advance()  # Skip first #
+            self.advance()  
             while self.current_char is not None and self.current_char != '#':
                 comment_text += self.current_char
                 self.advance()
             if self.current_char == '#':
-                self.advance()  # Skip closing #
+                self.advance()  
                 return Token('COMMENT', comment_text.strip())
             return UnclosedStringError(pos_start, self.pos, "Unclosed single-line comment")
 
-        # If a single # is not followed by another #
         else:
             char = self.current_char
             self.advance()
             return IllegalCharError(pos_start, self.pos, f"Unexpected character '{char}' after '#'")
-
-
 
     def skip_comment(self):
         if self.text[self.pos.idx:self.pos.idx+2] == '##':
@@ -340,7 +320,7 @@ class Lexer:
             self.advance()
             while self.current_char is not None and self.text[self.pos.idx:self.pos.idx+2] != '##':
                 self.advance()
-            self.advance()  # Skip ##
+            self.advance()  
             self.advance()
         else:
             while self.current_char is not None and self.current_char != '\n':
@@ -350,7 +330,7 @@ class Lexer:
 #                RUN                  #
 #######################################
 
-import os  # To handle file extension checks
+import os 
 
 def run(fn, text):
     if not fn.endswith('.lit'):
@@ -375,8 +355,3 @@ def run(fn, text):
             f.write( str(token) + "\n")
 
     return tokens, None
-
-
-
-
-
