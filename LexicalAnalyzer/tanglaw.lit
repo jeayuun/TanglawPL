@@ -1,0 +1,7 @@
+int x = -10; #example comment#
+float y = -20.5;
+if (x > y) {
+    print("x is greater");
+} else {
+    print("y is greater");
+}

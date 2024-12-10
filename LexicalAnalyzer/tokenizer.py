@@ -350,7 +350,12 @@ class Lexer:
 #                RUN                  #
 #######################################
 
+import os  # To handle file extension checks
+
 def run(fn, text):
+    if not fn.endswith('.lit'):
+        return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
+
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
 
@@ -370,6 +375,7 @@ def run(fn, text):
             f.write( str(token) + "\n")
 
     return tokens, None
+
 
 
 
