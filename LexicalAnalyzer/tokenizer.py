@@ -147,7 +147,7 @@ class Lexer:
             elif self.current_char == '"':
                 tokens.append(self.make_string())
 
-            # Handle characters
+            # Handle characters (including special symbols)
             elif self.current_char == "'":
                 tokens.append(self.make_character())
 
@@ -163,13 +163,14 @@ class Lexer:
 
         return tokens, None
 
+
     def peek(self):
         peek_pos = self.pos.idx + 1
         return self.text[peek_pos] if peek_pos < len(self.text) else None
 
     def is_negative_sign(self):
         # Determine if '-' is part of a negative number
-        if self.prev_token_type in ['REAL_NUMBER', 'SIGNED_INTEGER', 'IDENTIFIER', 'CLOSING_PARENTHESIS']:
+        if self.prev_token_type in ['REAL_NUMBER', 'INTEGER', 'IDENTIFIER', 'CLOSING_PARENTHESIS']:
             return False
         return True
 
@@ -194,7 +195,7 @@ class Lexer:
             if has_decimal:
                 token = Token('REAL_NUMBER', float(num_str))
             else:
-                token = Token('SIGNED_INTEGER', int(num_str))
+                token = Token('INTEGER', int(num_str))
             self.prev_token_type = token.type  # Update previous token type
             return token
         except ValueError:
@@ -243,17 +244,20 @@ class Lexer:
     def make_character(self):
         pos_start = self.pos.copy()
         self.advance()  # Skip opening single quote
+
         if self.current_char is None or self.current_char == "'":
             return IllegalCharError(pos_start, self.pos, "Empty character literal")
-        
-        char_val = self.current_char
-        self.advance()
 
-        if self.current_char != "'":
+        char_val = self.current_char  # Capture the character
+
+        self.advance()  # Move to the next character
+        if self.current_char != "'":  # Ensure the character literal is closed
             return IllegalCharError(pos_start, self.pos, "Unclosed character literal")
-        
-        self.advance()
+
+        self.advance()  # Skip closing single quote
         return Token('CHARACTER_LITERAL', char_val)
+
+
 
     def make_symbol(self):
         pos_start = self.pos.copy()
