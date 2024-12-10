@@ -1,5 +1,5 @@
 #######################################
-# CONSTANTS
+#              CONSTANTS              #
 #######################################
 
 DIGITS = '0123456789'
@@ -34,7 +34,7 @@ WHITESPACE = [' ', '\t', '\n', '\v']
 PARENTHESIS = ['(', ')', '[', ']', '{', '}']
 
 #######################################
-# ERRORS
+#               ERRORS                #
 #######################################
 
 class Error:
@@ -62,7 +62,7 @@ class InvalidNumberError(Error):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
 
 #######################################
-# POSITION
+#              POSITION               #
 #######################################
 
 class Position:
@@ -87,7 +87,7 @@ class Position:
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 
 #######################################
-# TOKENS
+#               TOKENS                #
 #######################################
 
 class Token:
@@ -100,7 +100,7 @@ class Token:
         return f'{self.type}'
 
 #######################################
-# LEXER
+#               LEXER                 #
 #######################################
 
 class Lexer:
@@ -120,8 +120,11 @@ class Lexer:
         tokens = []
 
         while self.current_char is not None:
-            if self.current_char in WHITESPACE:
+            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):  # Skip whitespace and escape sequences
                 self.advance()
+                if self.current_char == '\\' and self.peek() in 'tnv':  # Handle escape sequences
+                    self.advance()  # Skip '\'
+                    self.advance()  # Skip 't', 'n', or 'v'
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 tokens.append(self.make_number())
             elif self.current_char in LETTERS or self.current_char == '_':
@@ -145,6 +148,9 @@ class Lexer:
         
         return tokens, None
 
+    def peek(self):
+        peek_pos = self.pos.idx + 1
+        return self.text[peek_pos] if peek_pos < len(self.text) else None
 
     def is_negative_sign(self):
         # Determine if '-' is part of a negative number
@@ -322,7 +328,7 @@ class Lexer:
                 self.advance()
 
 #######################################
-# RUN
+#                RUN                  #
 #######################################
 
 def run(fn, text):
@@ -332,3 +338,5 @@ def run(fn, text):
     if error:
         return [], error.as_string()
     return tokens, None
+
+
