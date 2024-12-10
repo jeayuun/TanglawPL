@@ -330,7 +330,8 @@ class Lexer:
 #                RUN                  #
 #######################################
 
-import os 
+import os
+from prettytable import PrettyTable 
 
 def run(fn, text):
     if not fn.endswith('.lit'):
@@ -342,16 +343,34 @@ def run(fn, text):
     if error:
         return [], error.as_string()
 
+    symbol_table = {}
+
+    for token in tokens:
+        if token.type not in symbol_table:
+            symbol_table[token.type] = []
+        symbol_table[token.type].append(token.value)
+
     with open("symbol_table.txt", "w") as f:
-        f.write("--------------------------------------\n")
-        f.write("|               Input                 |\n")
-        f.write("--------------------------------------\n")
+        f.write("--------------- Input ---------------\n")
         f.write(text + "\n\n")
         
-        f.write("--------------------------------------\n")
-        f.write("|               Tokens                |\n")
-        f.write("--------------------------------------\n")
+        f.write("----------- Tokens Table ------------\n")
+        token_table = PrettyTable()
+        token_table.field_names = ["Token Specification", "Tokens"]
+
         for token in tokens:
-            f.write( str(token) + "\n")
+            token_table.add_row([token.type, token.value])
+        
+        f.write(token_table.get_string())
+        f.write("\n\n")
+
+        f.write("----------- Symbol Table ------------\n")
+        symbol_table_table = PrettyTable()
+        symbol_table_table.field_names = ["Token Specification", "Tokens"]
+
+        for token_type, values in symbol_table.items():
+            symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
+
+        f.write(symbol_table_table.get_string())
 
     return tokens, None

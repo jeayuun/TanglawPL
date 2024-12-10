@@ -1,6 +1,4 @@
---------------------------------------
-|               Input                 |
---------------------------------------
+--------------- Input ---------------
 int x = -10; #example comment#
 float y = -20.5;
 if (x > y) {
@@ -10,37 +8,55 @@ if (x > y) {
 }
 
 
---------------------------------------
-|               Tokens                |
---------------------------------------
-DATA_TYPE: int
-IDENTIFIER: x
-ASSIGNMENT_OPERATOR: =
-INTEGER: -10
-TERMINATING_SYMBOL: ;
-DATA_TYPE: float
-IDENTIFIER: y
-ASSIGNMENT_OPERATOR: =
-REAL_NUMBER: -20.5
-TERMINATING_SYMBOL: ;
-KEYWORD: if
-PARENTHESIS: (
-IDENTIFIER: x
-RELATIONAL_OPERATOR: >
-IDENTIFIER: y
-PARENTHESIS: )
-PARENTHESIS: {
-KEYWORD: print
-PARENTHESIS: (
-STRING_LITERAL: x is greater
-PARENTHESIS: )
-TERMINATING_SYMBOL: ;
-PARENTHESIS: }
-KEYWORD: else
-PARENTHESIS: {
-KEYWORD: print
-PARENTHESIS: (
-STRING_LITERAL: y is greater
-PARENTHESIS: )
-TERMINATING_SYMBOL: ;
-PARENTHESIS: }
+----------- Tokens Table ------------
++---------------------+--------------+
+| Token Specification |    Tokens    |
++---------------------+--------------+
+|      DATA_TYPE      |     int      |
+|      IDENTIFIER     |      x       |
+| ASSIGNMENT_OPERATOR |      =       |
+|       INTEGER       |     -10      |
+|  TERMINATING_SYMBOL |      ;       |
+|      DATA_TYPE      |    float     |
+|      IDENTIFIER     |      y       |
+| ASSIGNMENT_OPERATOR |      =       |
+|     REAL_NUMBER     |    -20.5     |
+|  TERMINATING_SYMBOL |      ;       |
+|       KEYWORD       |      if      |
+|     PARENTHESIS     |      (       |
+|      IDENTIFIER     |      x       |
+| RELATIONAL_OPERATOR |      >       |
+|      IDENTIFIER     |      y       |
+|     PARENTHESIS     |      )       |
+|     PARENTHESIS     |      {       |
+|       KEYWORD       |    print     |
+|     PARENTHESIS     |      (       |
+|    STRING_LITERAL   | x is greater |
+|     PARENTHESIS     |      )       |
+|  TERMINATING_SYMBOL |      ;       |
+|     PARENTHESIS     |      }       |
+|       KEYWORD       |     else     |
+|     PARENTHESIS     |      {       |
+|       KEYWORD       |    print     |
+|     PARENTHESIS     |      (       |
+|    STRING_LITERAL   | y is greater |
+|     PARENTHESIS     |      )       |
+|  TERMINATING_SYMBOL |      ;       |
+|     PARENTHESIS     |      }       |
++---------------------+--------------+
+
+----------- Symbol Table ------------
++---------------------+------------------------------+
+| Token Specification |            Tokens            |
++---------------------+------------------------------+
+|      DATA_TYPE      |          int, float          |
+|      IDENTIFIER     |          x, y, x, y          |
+| ASSIGNMENT_OPERATOR |             =, =             |
+|       INTEGER       |             -10              |
+|  TERMINATING_SYMBOL |          ;, ;, ;, ;          |
+|     REAL_NUMBER     |            -20.5             |
+|       KEYWORD       |    if, print, else, print    |
+|     PARENTHESIS     | (, ), {, (, ), }, {, (, ), } |
+| RELATIONAL_OPERATOR |              >               |
+|    STRING_LITERAL   |  x is greater, y is greater  |
++---------------------+------------------------------+
