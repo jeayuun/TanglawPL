@@ -5,7 +5,7 @@
 DIGITS = '0123456789'
 LOWERCASE_LETTERS = 'abcdefghijklmnopqrstuvwxyz'
 UPPERCASE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-LETTERS = LOWERCASE_LETTERS + UPPERCASE_LETTERS
+ALPHABETS = LOWERCASE_LETTERS + UPPERCASE_LETTERS
 SYMBOLS = "+-*/%|:&=<>!@#$~`^;,()[]{}"
 DATA_TYPES = ['int', 'String', 'char', 'boolean', 'float', 'double', 'long', 'short', 'void', 'byte']
 BOOLEAN_VALUES = ['true', 'false']
@@ -25,13 +25,16 @@ RESERVED_WORDS = [
 ARITHMETIC_OPERATORS = ['+', '-', '*', '/', '%', '++', '--', '**']
 RELATIONAL_OPERATORS = ['<', '>', '<=', '>=', '==', '!=']
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '~=', '**=', '&=', '`=', '^=', '<<=', '>>=']
-BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>']
+BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '!']
 LOGICAL_OPERATORS = ['!', '&&', '||']
+UNARY_OPERATORS = ['+', '-', '++', '--']
 SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~']
 TERMINATING_SYMBOLS = [';']
 SEPARATING_SYMBOLS = [',']
 WHITESPACE = [' ', '\t', '\n', '\v']
 PARENTHESIS = ['(', ')', '[', ']', '{', '}']
+UNDERSCORE = ['_']
+NOISE_WORDS = ['ant', 'ine']
 
 #######################################
 #               ERRORS                #
@@ -60,6 +63,8 @@ class UnclosedStringError(Error):
 class InvalidNumberError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
+        self.type = 'ERROR'  # Add a type for error handling
+
 
 #######################################
 #              POSITION               #
@@ -132,9 +137,12 @@ class Lexer:
                     return [], comment_token
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
-                tokens.append(self.make_number())
+                try:
+                    tokens.append(self.make_number())
+                except InvalidNumberError as e:
+                    return [], e  # Immediately return the error
 
-            elif self.current_char in LETTERS or self.current_char == '_':
+            elif self.current_char in ALPHABETS or self.current_char == '_':
                 tokens.append(self.make_identifier_or_keyword())
 
             elif self.current_char == '"':
@@ -154,11 +162,15 @@ class Lexer:
 
         return tokens, None
 
+
+
     def peek(self):
         peek_pos = self.pos.idx + 1
         return self.text[peek_pos] if peek_pos < len(self.text) else None
 
     def is_negative_sign(self):
+        # This function determines if the current character is a negative sign
+        # or part of a unary operation. It checks the context based on the previous token.
         if self.prev_token_type in ['REAL_NUMBER', 'INTEGER', 'IDENTIFIER', 'CLOSING_PARENTHESIS']:
             return False
         return True
@@ -168,7 +180,8 @@ class Lexer:
         has_decimal = False
         pos_start = self.pos.copy()
 
-        if self.current_char == '-':  
+        # Handle unary + and - operators
+        if self.current_char == '-' or self.current_char == '+':  
             num_str += self.current_char
             self.advance()
 
@@ -181,18 +194,23 @@ class Lexer:
             self.advance()
 
         try:
+            # Handle the number after all the unary signs
             if has_decimal:
                 token = Token('REAL_NUMBER', float(num_str))
             else:
                 token = Token('INTEGER', int(num_str))
-            self.prev_token_type = token.type  
+
+            self.prev_token_type = token.type  # Keep track of the previous token type
             return token
         except ValueError:
             return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
 
+
+
+
     def make_identifier_or_keyword(self):
         id_str = ''
-        while self.current_char is not None and (self.current_char in LETTERS + DIGITS + '_'):
+        while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
             id_str += self.current_char
             self.advance()
 
@@ -204,6 +222,10 @@ class Lexer:
             return Token('KEYWORD', id_str)
         elif id_str in RESERVED_WORDS:
             return Token('RESERVED_WORD', id_str)
+        elif id_str in NOISE_WORDS:
+            return Token('NOISE_WORD', id_str)
+        elif id_str == '_':
+            return Token('UNDERSCORE', id_str)
         else:
             return Token('IDENTIFIER', id_str)
 
@@ -249,14 +271,28 @@ class Lexer:
         symbol_str = self.current_char
         self.advance()
 
+        # Check for "++" and "--" as separate unary operators
+        if symbol_str == '+' or symbol_str == '-':
+            if self.current_char == symbol_str:  # It's a "++" or "--"
+                symbol_str += self.current_char
+                self.advance()
+
+        # Now, handle the case for unary operators and others
         while self.current_char is not None and (symbol_str + self.current_char) in (
             ARITHMETIC_OPERATORS + RELATIONAL_OPERATORS + ASSIGNMENT_OPERATORS +
-            BITWISE_OPERATORS + LOGICAL_OPERATORS
+            BITWISE_OPERATORS + LOGICAL_OPERATORS + UNARY_OPERATORS
         ):
             symbol_str += self.current_char
             self.advance()
 
-        if symbol_str == '-':
+        # Handle known symbols
+        if symbol_str == '++':
+            token = Token('UNARY_OPERATOR', '++')
+        elif symbol_str == '--':
+            token = Token('UNARY_OPERATOR', '--')
+        elif symbol_str == '-':
+            token = Token('ARITHMETIC_OPERATOR', symbol_str)
+        elif symbol_str == '+':
             token = Token('ARITHMETIC_OPERATOR', symbol_str)
         elif symbol_str in ARITHMETIC_OPERATORS:
             token = Token('ARITHMETIC_OPERATOR', symbol_str)
@@ -279,8 +315,9 @@ class Lexer:
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  
+        self.prev_token_type = token.type  # Keep track of the previous token type
         return token
+
 
     def make_comment(self):
         pos_start = self.pos.copy()

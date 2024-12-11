@@ -1,5 +1,5 @@
 --------------- Input ---------------
-int x = -10; #example comment#
+int x = 10 - -2; \t #example comment#
 float y = -20.5;
 if (x > y) {
     print("x is greater");
@@ -15,7 +15,9 @@ if (x > y) {
 |      DATA_TYPE      |     int      |
 |      IDENTIFIER     |      x       |
 | ASSIGNMENT_OPERATOR |      =       |
-|       INTEGER       |     -10      |
+|       INTEGER       |      10      |
+| ARITHMETIC_OPERATOR |      -       |
+|       INTEGER       |      -2      |
 |  TERMINATING_SYMBOL |      ;       |
 |      DATA_TYPE      |    float     |
 |      IDENTIFIER     |      y       |
@@ -52,7 +54,8 @@ if (x > y) {
 |      DATA_TYPE      |          int, float          |
 |      IDENTIFIER     |          x, y, x, y          |
 | ASSIGNMENT_OPERATOR |             =, =             |
-|       INTEGER       |             -10              |
+|       INTEGER       |            10, -2            |
+| ARITHMETIC_OPERATOR |              -               |
 |  TERMINATING_SYMBOL |          ;, ;, ;, ;          |
 |     REAL_NUMBER     |            -20.5             |
 |       KEYWORD       |    if, print, else, print    |
