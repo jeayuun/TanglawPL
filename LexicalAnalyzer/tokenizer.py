@@ -46,10 +46,10 @@ class Error:
         self.pos_end = pos_end
         self.error_name = error_name
         self.details = details
-    
+
     def as_string(self):
         result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col}'
         return result
 
 class IllegalCharError(Error):
@@ -63,8 +63,7 @@ class UnclosedStringError(Error):
 class InvalidNumberError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
-        self.type = 'ERROR'  # Add a type for error handling
-
+        self.type = 'ERROR' 
 
 #######################################
 #              POSITION               #
@@ -131,7 +130,7 @@ class Lexer:
                     self.advance() 
                     self.advance()  
 
-            elif self.current_char == '#':  # Handle comments
+            elif self.current_char == '#':
                 comment_token = self.make_comment()
                 if isinstance(comment_token, Error):  
                     return [], comment_token
@@ -140,7 +139,7 @@ class Lexer:
                 try:
                     tokens.append(self.make_number())
                 except InvalidNumberError as e:
-                    return [], e  # Immediately return the error
+                    return [], e 
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
                 tokens.append(self.make_identifier_or_keyword())
@@ -176,7 +175,6 @@ class Lexer:
         has_decimal = False
         pos_start = self.pos.copy()
 
-        # Handle unary + and - operators
         if self.current_char == '-' or self.current_char == '+':  
             num_str += self.current_char
             self.advance()
@@ -189,7 +187,6 @@ class Lexer:
             num_str += self.current_char
             self.advance()
 
-        # Check if a number is followed by invalid characters
         if self.current_char is not None and self.current_char in ALPHABETS + '_':
             invalid_token = num_str + self.current_char
             self.advance()
@@ -199,13 +196,12 @@ class Lexer:
             return IllegalCharError(pos_start, self.pos, f"Invalid number or identifier '{invalid_token}'")
 
         try:
-            # Handle the number after all the unary signs
             if has_decimal:
                 token = Token('REAL_NUMBER', float(num_str))
             else:
                 token = Token('INTEGER', int(num_str))
 
-            self.prev_token_type = token.type  # Keep track of the previous token type
+            self.prev_token_type = token.type  
             return token
         except ValueError:
             return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
@@ -219,11 +215,16 @@ class Lexer:
             self.advance()
         else:
             pos_end = self.pos.copy()
-            return IllegalCharError(pos_start, pos_end, "Identifiers must begin with a letter.")
+            return IllegalCharError(pos_start, pos_end, 
+                f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
 
-        while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
+        while self.current_char is not None and self.current_char not in set(WHITESPACE).union(set(SYMBOLS)):
             id_str += self.current_char
             self.advance()
+        
+        if not all(char in ALPHABETS + DIGITS + '_' for char in id_str):
+            return IllegalCharError(pos_start, self.pos, 
+                f"Invalid identifier '{id_str}' (Identifiers can only include letters, digits, and underscores).")
 
         if id_str in DATA_TYPES:
             return Token('DATA_TYPE', id_str)
@@ -232,7 +233,7 @@ class Lexer:
         elif id_str in KEYWORDS:
             return Token('KEYWORD', id_str)
         elif id_str in RESERVED_WORDS:
-            return IllegalCharError(pos_start, self.pos, f"'{id_str}' is a reserved word and cannot be used as an identifier.")
+            return Token('RESERVED_WORDS', id_str)
         else:
             return Token('IDENTIFIER', id_str)
     
@@ -278,13 +279,11 @@ class Lexer:
         symbol_str = self.current_char
         self.advance()
 
-        # Check for "++" and "--" as separate unary operators
         if symbol_str == '+' or symbol_str == '-':
-            if self.current_char == symbol_str:  # It's a "++" or "--"
+            if self.current_char == symbol_str: 
                 symbol_str += self.current_char
                 self.advance()
 
-        # Now, handle the case for unary operators and others
         while self.current_char is not None and (symbol_str + self.current_char) in (
             ARITHMETIC_OPERATORS + RELATIONAL_OPERATORS + ASSIGNMENT_OPERATORS +
             BITWISE_OPERATORS + LOGICAL_OPERATORS + UNARY_OPERATORS
@@ -292,7 +291,6 @@ class Lexer:
             symbol_str += self.current_char
             self.advance()
 
-        # Handle known symbols
         if symbol_str == '++':
             token = Token('UNARY_OPERATOR', '++')
         elif symbol_str == '--':
@@ -322,7 +320,7 @@ class Lexer:
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  # Keep track of the previous token type
+        self.prev_token_type = token.type
         return token
 
     def make_comment(self):

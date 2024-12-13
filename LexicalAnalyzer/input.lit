@@ -1,9 +1,8 @@
 int x = 10 - -2; \t #example comment#
-int y = 2**12;
+int y = 2;
 if (x > y) {
     print("x is greater");
-    x++;
 } else {
     print("y is greater");
 }
-
+boolean flag = true;

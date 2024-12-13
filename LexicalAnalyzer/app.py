@@ -13,9 +13,11 @@ def process_file(filename):
         result, error = tokenizer.run(filename, text)
 
         if error:
-            print(error.as_string()) 
+            print(f"Error: {error}")  
         else:
-            print(result)
+            print("Tokens:")
+            for token in result:
+                print(token)
 
     except FileNotFoundError:
         print(f"Error: The file '{filename}' does not exist.")

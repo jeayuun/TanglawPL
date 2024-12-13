@@ -1,13 +1,12 @@
 --------------- Input ---------------
-int &x = 10 - -2; \t #example comment#
-int y = 2**12;
+int x = 10 - -2; \t #example comment#
+int y = 2;
 if (x > y) {
     print("x is greater");
-    x++;
 } else {
     print("y is greater");
 }
-
+boolean flag = true;
 
 
 ----------- Tokens Table ------------
@@ -15,7 +14,6 @@ if (x > y) {
 | Token Specification |    Tokens    |
 +---------------------+--------------+
 |      DATA_TYPE      |     int      |
-|   BITWISE_OPERATOR  |      &       |
 |      IDENTIFIER     |      x       |
 | ASSIGNMENT_OPERATOR |      =       |
 |       INTEGER       |      10      |
@@ -26,8 +24,6 @@ if (x > y) {
 |      IDENTIFIER     |      y       |
 | ASSIGNMENT_OPERATOR |      =       |
 |       INTEGER       |      2       |
-| ARITHMETIC_OPERATOR |      **      |
-|       INTEGER       |      12      |
 |  TERMINATING_SYMBOL |      ;       |
 |       KEYWORD       |      if      |
 |     PARENTHESIS     |      (       |
@@ -41,9 +37,6 @@ if (x > y) {
 |    STRING_LITERAL   | x is greater |
 |     PARENTHESIS     |      )       |
 |  TERMINATING_SYMBOL |      ;       |
-|      IDENTIFIER     |      x       |
-|    UNARY_OPERATOR   |      ++      |
-|  TERMINATING_SYMBOL |      ;       |
 |     PARENTHESIS     |      }       |
 |       KEYWORD       |     else     |
 |     PARENTHESIS     |      {       |
@@ -53,22 +46,26 @@ if (x > y) {
 |     PARENTHESIS     |      )       |
 |  TERMINATING_SYMBOL |      ;       |
 |     PARENTHESIS     |      }       |
+|      DATA_TYPE      |   boolean    |
+|      IDENTIFIER     |     flag     |
+| ASSIGNMENT_OPERATOR |      =       |
+|       BOOLEAN       |     true     |
+|  TERMINATING_SYMBOL |      ;       |
 +---------------------+--------------+
 
 ----------- Symbol Table ------------
 +---------------------+------------------------------+
 | Token Specification |            Tokens            |
 +---------------------+------------------------------+
-|      DATA_TYPE      |           int, int           |
-|   BITWISE_OPERATOR  |              &               |
-|      IDENTIFIER     |        x, y, x, y, x         |
-| ASSIGNMENT_OPERATOR |             =, =             |
-|       INTEGER       |        10, -2, 2, 12         |
-| ARITHMETIC_OPERATOR |            -, **             |
+|      DATA_TYPE      |      int, int, boolean       |
+|      IDENTIFIER     |       x, y, x, y, flag       |
+| ASSIGNMENT_OPERATOR |           =, =, =            |
+|       INTEGER       |          10, -2, 2           |
+| ARITHMETIC_OPERATOR |              -               |
 |  TERMINATING_SYMBOL |        ;, ;, ;, ;, ;         |
 |       KEYWORD       |    if, print, else, print    |
 |     PARENTHESIS     | (, ), {, (, ), }, {, (, ), } |
 | RELATIONAL_OPERATOR |              >               |
 |    STRING_LITERAL   |  x is greater, y is greater  |
-|    UNARY_OPERATOR   |              ++              |
+|       BOOLEAN       |             true             |
 +---------------------+------------------------------+
