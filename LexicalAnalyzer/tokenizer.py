@@ -22,12 +22,12 @@ RESERVED_WORDS = [
     'triangle', 'rectangle', 'square', 'volumeOf', 'radius', 'circumference',
     'length', 'height', 'width', 'side', 'solve'
 ]
-ARITHMETIC_OPERATORS = ['+', '-', '*', '/', '%', '++', '--', '**']
+ARITHMETIC_OPERATORS = ['+', '-', '*', '/', '%', '**']
+UNARY_OPERATORS = ['+', '-', '++', '--']
 RELATIONAL_OPERATORS = ['<', '>', '<=', '>=', '==', '!=']
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '~=', '**=', '&=', '`=', '^=', '<<=', '>>=']
-BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '!']
 LOGICAL_OPERATORS = ['!', '&&', '||']
-UNARY_OPERATORS = ['+', '-', '++', '--']
+BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '!']
 SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~']
 TERMINATING_SYMBOLS = [';']
 SEPARATING_SYMBOLS = [',']
@@ -116,7 +116,7 @@ class Lexer:
         self.current_char = None
         self.prev_token_type = None  
         self.advance()
-    
+
     def advance(self):
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
@@ -162,15 +162,11 @@ class Lexer:
 
         return tokens, None
 
-
-
     def peek(self):
         peek_pos = self.pos.idx + 1
         return self.text[peek_pos] if peek_pos < len(self.text) else None
 
     def is_negative_sign(self):
-        # This function determines if the current character is a negative sign
-        # or part of a unary operation. It checks the context based on the previous token.
         if self.prev_token_type in ['REAL_NUMBER', 'INTEGER', 'IDENTIFIER', 'CLOSING_PARENTHESIS']:
             return False
         return True
@@ -185,13 +181,22 @@ class Lexer:
             num_str += self.current_char
             self.advance()
 
-        while self.current_char is not None and (self.current_char in DIGITS or self.current_char == '.'):
+        while self.current_char is not None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
                 if has_decimal:
                     return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str + self.current_char}'")
                 has_decimal = True
             num_str += self.current_char
             self.advance()
+
+        # Check if a number is followed by invalid characters
+        if self.current_char is not None and self.current_char in ALPHABETS + '_':
+            invalid_token = num_str + self.current_char
+            self.advance()
+            while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
+                invalid_token += self.current_char
+                self.advance()
+            return IllegalCharError(pos_start, self.pos, f"Invalid number or identifier '{invalid_token}'")
 
         try:
             # Handle the number after all the unary signs
@@ -205,11 +210,17 @@ class Lexer:
         except ValueError:
             return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
 
-
-
-
     def make_identifier_or_keyword(self):
         id_str = ''
+        pos_start = self.pos.copy()
+
+        if self.current_char is not None and self.current_char in ALPHABETS:
+            id_str += self.current_char
+            self.advance()
+        else:
+            pos_end = self.pos.copy()
+            return IllegalCharError(pos_start, pos_end, "Identifiers must begin with a letter.")
+
         while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
             id_str += self.current_char
             self.advance()
@@ -221,14 +232,10 @@ class Lexer:
         elif id_str in KEYWORDS:
             return Token('KEYWORD', id_str)
         elif id_str in RESERVED_WORDS:
-            return Token('RESERVED_WORD', id_str)
-        elif id_str in NOISE_WORDS:
-            return Token('NOISE_WORD', id_str)
-        elif id_str == '_':
-            return Token('UNDERSCORE', id_str)
+            return IllegalCharError(pos_start, self.pos, f"'{id_str}' is a reserved word and cannot be used as an identifier.")
         else:
             return Token('IDENTIFIER', id_str)
-
+    
     def make_string(self):
         str_val = ''
         pos_start = self.pos.copy()
@@ -317,7 +324,6 @@ class Lexer:
 
         self.prev_token_type = token.type  # Keep track of the previous token type
         return token
-
 
     def make_comment(self):
         pos_start = self.pos.copy()
