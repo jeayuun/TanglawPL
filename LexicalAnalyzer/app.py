@@ -8,7 +8,14 @@ def process_file(filename):
         return
 
     try:
-        with open(filename, 'r') as file:
+        downloads_folder = Path.home() / "Downloads"
+        input_filepath = downloads_folder / filename
+
+        if not input_filepath.exists():
+            print(f"Error: The file '{input_filepath}' does not exist in the Downloads folder.")
+            return
+
+        with open(input_filepath, 'r') as file:
             text = file.read()
 
         result, error = tokenizer.run(filename, text)
@@ -16,7 +23,6 @@ def process_file(filename):
         if error:
             print(f"Error: {error}")
         else:
-            downloads_folder = Path.home() / "Downloads"
             output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
             with open(output_filename, 'w') as output_file:
@@ -54,5 +60,5 @@ def process_file(filename):
         print(f"Error: {e}")
 
 if __name__ == '__main__':
-    filename = input("Enter the .lit file name: ")
+    filename = input("Enter the .lit file name from the Downloads folder: ")
     process_file(filename)

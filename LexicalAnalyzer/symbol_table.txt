@@ -1,71 +1,38 @@
 --------------- Input ---------------
-int x = 10 - -2; \t #example comment#
-int y = 2;
-if (x > y) {
-    print("x is greater");
-} else {
-    print("y is greater");
+def solveArea(radius) {
+    return 3.14 * radius * radius;
 }
-boolean flag = true;
 
 
 ----------- Tokens Table ------------
-+---------------------+--------------+
-| Token Specification |    Tokens    |
-+---------------------+--------------+
-|      DATA_TYPE      |     int      |
-|      IDENTIFIER     |      x       |
-| ASSIGNMENT_OPERATOR |      =       |
-|       INTEGER       |      10      |
-| ARITHMETIC_OPERATOR |      -       |
-|       INTEGER       |      -2      |
-|  TERMINATING_SYMBOL |      ;       |
-|      DATA_TYPE      |     int      |
-|      IDENTIFIER     |      y       |
-| ASSIGNMENT_OPERATOR |      =       |
-|       INTEGER       |      2       |
-|  TERMINATING_SYMBOL |      ;       |
-|       KEYWORD       |      if      |
-|     PARENTHESIS     |      (       |
-|      IDENTIFIER     |      x       |
-| RELATIONAL_OPERATOR |      >       |
-|      IDENTIFIER     |      y       |
-|     PARENTHESIS     |      )       |
-|     PARENTHESIS     |      {       |
-|       KEYWORD       |    print     |
-|     PARENTHESIS     |      (       |
-|    STRING_LITERAL   | x is greater |
-|     PARENTHESIS     |      )       |
-|  TERMINATING_SYMBOL |      ;       |
-|     PARENTHESIS     |      }       |
-|       KEYWORD       |     else     |
-|     PARENTHESIS     |      {       |
-|       KEYWORD       |    print     |
-|     PARENTHESIS     |      (       |
-|    STRING_LITERAL   | y is greater |
-|     PARENTHESIS     |      )       |
-|  TERMINATING_SYMBOL |      ;       |
-|     PARENTHESIS     |      }       |
-|      DATA_TYPE      |   boolean    |
-|      IDENTIFIER     |     flag     |
-| ASSIGNMENT_OPERATOR |      =       |
-|       BOOLEAN       |     true     |
-|  TERMINATING_SYMBOL |      ;       |
-+---------------------+--------------+
++---------------------+-----------+
+| Token Specification |   Tokens  |
++---------------------+-----------+
+|       KEYWORD       |    def    |
+|      IDENTIFIER     | solveArea |
+|     PARENTHESIS     |     (     |
+|    RESERVED_WORDS   |   radius  |
+|     PARENTHESIS     |     )     |
+|     PARENTHESIS     |     {     |
+|       KEYWORD       |   return  |
+|     REAL_NUMBER     |    3.14   |
+| ARITHMETIC_OPERATOR |     *     |
+|    RESERVED_WORDS   |   radius  |
+| ARITHMETIC_OPERATOR |     *     |
+|    RESERVED_WORDS   |   radius  |
+|  TERMINATING_SYMBOL |     ;     |
+|     PARENTHESIS     |     }     |
++---------------------+-----------+
 
 ----------- Symbol Table ------------
-+---------------------+------------------------------+
-| Token Specification |            Tokens            |
-+---------------------+------------------------------+
-|      DATA_TYPE      |      int, int, boolean       |
-|      IDENTIFIER     |       x, y, x, y, flag       |
-| ASSIGNMENT_OPERATOR |           =, =, =            |
-|       INTEGER       |          10, -2, 2           |
-| ARITHMETIC_OPERATOR |              -               |
-|  TERMINATING_SYMBOL |        ;, ;, ;, ;, ;         |
-|       KEYWORD       |    if, print, else, print    |
-|     PARENTHESIS     | (, ), {, (, ), }, {, (, ), } |
-| RELATIONAL_OPERATOR |              >               |
-|    STRING_LITERAL   |  x is greater, y is greater  |
-|       BOOLEAN       |             true             |
-+---------------------+------------------------------+
++---------------------+------------------------+
+| Token Specification |         Tokens         |
++---------------------+------------------------+
+|       KEYWORD       |      def, return       |
+|      IDENTIFIER     |       solveArea        |
+|     PARENTHESIS     |       (, ), {, }       |
+|    RESERVED_WORDS   | radius, radius, radius |
+|     REAL_NUMBER     |          3.14          |
+| ARITHMETIC_OPERATOR |          *, *          |
+|  TERMINATING_SYMBOL |           ;            |
++---------------------+------------------------+
