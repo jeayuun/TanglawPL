@@ -40,6 +40,7 @@ NOISE_WORDS = ['ant', 'ine']
 #######################################
 #               ERRORS                #
 #######################################
+# To be edited
 
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
@@ -283,6 +284,7 @@ class Lexer:
         return Token('CHARACTER_LITERAL', char_val)
 
     def make_symbol(self):
+    # edit for accessor symbol
         pos_start = self.pos.copy()
         symbol_str = self.current_char
         self.advance()
@@ -412,17 +414,17 @@ def run(fn, text):
     if not fn.endswith('.lit'):
         return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
 
-    input_text = "volume(cubic.m) = volumeOf.sphere(10);"
+    # input_text = "volume(cubic.m) = volumeOf.sphere(10);"
 
-    lexer = Lexer("<stdin>", input_text)
-    tokens, error = lexer.make_tokens()
+    # lexer = Lexer("<stdin>", input_text)
+    # tokens, error = lexer.make_tokens()
 
-    if error:
-        print("Error:", error.as_string())
-    else:
-        print("Tokens:")
-        for token in tokens:
-            print(token)
+    # if error:
+    #     print("Error:", error.as_string())
+    # else:
+    #     print("Tokens:")
+    #     for token in tokens:
+    #         print(token)
 
 
     lexer = Lexer(fn, text)
