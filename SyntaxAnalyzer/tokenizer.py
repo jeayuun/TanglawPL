@@ -129,28 +129,32 @@ class Lexer:
         while self.current_char is not None:
             if self.current_char in WHITESPACE:
                 self.advance()
+            elif self.current_char == '#':  # Comment
+                self.skip_comment()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
-            elif self.current_char == '+':
-                tokens.append(Token('PLUS', pos_start=self.pos.copy(), pos_end=self.pos.copy()))
-                self.advance()
-            elif self.current_char == '-':
-                tokens.append(Token('MINUS', pos_start=self.pos.copy(), pos_end=self.pos.copy()))
-                self.advance()
-            elif self.current_char == '*':
-                tokens.append(Token('MUL', pos_start=self.pos.copy(), pos_end=self.pos.copy()))
-                self.advance()
-            elif self.current_char == '/':
-                tokens.append(Token('DIV', pos_start=self.pos.copy(), pos_end=self.pos.copy()))
-                self.advance()
+            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
+                try:
+                    tokens.append(self.make_number())
+                except InvalidNumberError as e:
+                    return [], e
+
+            elif self.current_char in ALPHABETS or self.current_char == '_':
+                tokens.append(self.make_identifier_or_keyword())
+
+            elif self.current_char in SYMBOLS or self.current_char in PARENTHESIS:
+                symbol_or_error = self.make_symbol()
+                if isinstance(symbol_or_error, Error):
+                    print(f"Error: {symbol_or_error.as_string()}")
+                else:
+                    tokens.append(symbol_or_error)
+
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
+                print(f"Error: {IllegalCharError(pos_start, self.pos, f'Unknown symbol {char}').as_string()}")
 
-        tokens.append(Token('EOF', pos_start=self.pos.copy(), pos_end=self.pos.copy()))
-        print(f"Generated tokens: {tokens}")  # Debugging
         return tokens, None
 
 
@@ -331,6 +335,8 @@ class Lexer:
             token = Token('SEPARATING_SYMBOL', symbol_str, pos_start, self.pos.copy())
         elif symbol_str in PARENTHESIS:
             token = Token('PARENTHESIS', symbol_str, pos_start, self.pos.copy())
+        elif symbol_str in SYMBOLS or symbol_str in PARENTHESIS:
+            return Token('SYMBOL' if symbol_str not in PARENTHESIS else 'PARENTHESIS', symbol_str)
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 

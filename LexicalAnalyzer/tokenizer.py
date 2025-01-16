@@ -292,24 +292,6 @@ class Lexer:
                 symbol_str += self.current_char
                 self.advance()
 
-        if symbol_str == ".":
-            # Ensure that the previous token was `RESERVED_WORDS`
-            if self.prev_token_type == "RESERVED_WORDS":
-                saved_pos = self.pos.copy()
-                next_identifier = self.make_identifier_or_keyword()
-
-                # Validate the next token after the dot is `RESERVED_WORDS`
-                if isinstance(next_identifier, Token) and next_identifier.type == "RESERVED_WORDS":
-                    self.prev_token_type = "ACCESSOR_SYMBOL"  # Set `prev_token_type` for next calls
-                    return Token("ACCESSOR_SYMBOL", ".")
-                else:
-                    # Restore position and raise an error if next is invalid
-                    self.pos = saved_pos
-                    self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
-                    return IllegalCharError(pos_start, self.pos, f"Invalid usage of accessor symbol '{symbol_str}'")
-
-            return IllegalCharError(pos_start, self.pos, f"Accessor symbol '{symbol_str}' must follow a reserved word")
-
         # Handle other symbols normally
         while self.current_char is not None and (
             symbol_str + self.current_char
@@ -323,7 +305,9 @@ class Lexer:
         ):
             symbol_str += self.current_char
             self.advance()
-
+        
+        if symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
+            return Token('ACCESSOR_SYMBOL', symbol_str)
         if symbol_str == '++':
             token = Token('UNARY_OPERATOR', '++')
         elif symbol_str == '--':
@@ -411,19 +395,6 @@ from prettytable import PrettyTable
 def run(fn, text):
     if not fn.endswith('.lit'):
         return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
-
-    input_text = "volume(cubic.m) = volumeOf.sphere(10);"
-
-    lexer = Lexer("<stdin>", input_text)
-    tokens, error = lexer.make_tokens()
-
-    if error:
-        print("Error:", error.as_string())
-    else:
-        print("Tokens:")
-        for token in tokens:
-            print(token)
-
 
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()

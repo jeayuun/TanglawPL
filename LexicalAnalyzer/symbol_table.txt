@@ -1,4 +1,33 @@
 --------------- Input ---------------
-volume(cubic.m) = volumeOf.sphere(10);
+fetch = 100
+areaOf = 50
+circle = 3.14 * radius
+
 
 ----------- Tokens Table ------------
++---------------------+--------+
+| Token Specification | Tokens |
++---------------------+--------+
+|    RESERVED_WORDS   | fetch  |
+| ASSIGNMENT_OPERATOR |   =    |
+|       INTEGER       |  100   |
+|    RESERVED_WORDS   | areaOf |
+| ASSIGNMENT_OPERATOR |   =    |
+|       INTEGER       |   50   |
+|    RESERVED_WORDS   | circle |
+| ASSIGNMENT_OPERATOR |   =    |
+|     REAL_NUMBER     |  3.14  |
+| ARITHMETIC_OPERATOR |   *    |
+|    RESERVED_WORDS   | radius |
++---------------------+--------+
+
+----------- Symbol Table ------------
++---------------------+-------------------------------+
+| Token Specification |             Tokens            |
++---------------------+-------------------------------+
+|    RESERVED_WORDS   | fetch, areaOf, circle, radius |
+| ASSIGNMENT_OPERATOR |            =, =, =            |
+|       INTEGER       |            100, 50            |
+|     REAL_NUMBER     |              3.14             |
+| ARITHMETIC_OPERATOR |               *               |
++---------------------+-------------------------------+
