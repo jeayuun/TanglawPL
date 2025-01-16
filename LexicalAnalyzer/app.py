@@ -57,6 +57,9 @@ def process_file(filename):
 
         print(f"\nOutput saved to {output_filename}")
 
+    except UnicodeDecodeError as e:
+        print(f"Encoding error: {e}")
+        print("Try using a different encoding such as 'latin-1' or ensure the file is UTF-8 encoded.")
     except FileNotFoundError:
         print(f"Error: The file '{filename}' does not exist.")
     except Exception as e:

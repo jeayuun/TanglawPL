@@ -1,73 +1,80 @@
 --------------- Input ---------------
-volume(cubic.m) = volumeOf.sphere(10);
-int x = 10 - -2;    #example comment#
-int y = 2;
-if (x > y) {
-    print("x is greater");
-} else {
-    print("y is greater");
-}
-boolean flag = true;
+# identifiers #
+ThisIsAnIdentifer
+My_Num
+Num
+num09
+
+# assignment operators #
+=
++=
+-=
+*=
+/=
+%=
+~=
+**=
+&=
+`=
+^=
+<<=
+>=
+
+# arithmetic operators # 
+1 + 1
+1 - 1
+*
+/
+%
+**
+
+(x + y) * -z
+
 
 
 ----------- Tokens Table ------------
-+---------------------+-----------------+
-| Token Specification |      Tokens     |
-+---------------------+-----------------+
-|      IDENTIFIER     |      volume     |
-|     PARENTHESIS     |        (        |
-|    RESERVED_WORDS   |      cubic      |
-|   ACCESSOR_SYMBOL   |        .        |
-|    RESERVED_WORDS   |        m        |
-|     PARENTHESIS     |        )        |
-| ASSIGNMENT_OPERATOR |        =        |
-|    RESERVED_WORDS   |     volumeOf    |
-|   ACCESSOR_SYMBOL   |        .        |
-|    RESERVED_WORDS   |      sphere     |
-|     PARENTHESIS     |        (        |
-|       INTEGER       |        10       |
-|     PARENTHESIS     |        )        |
-|  TERMINATING_SYMBOL |        ;        |
-|      DATA_TYPE      |       int       |
-|      IDENTIFIER     |        x        |
-| ASSIGNMENT_OPERATOR |        =        |
-|       INTEGER       |        10       |
-| ARITHMETIC_OPERATOR |        -        |
-|       INTEGER       |        -2       |
-|  TERMINATING_SYMBOL |        ;        |
-|       COMMENT       | example comment |
-|      DATA_TYPE      |       int       |
-|      IDENTIFIER     |        y        |
-| ASSIGNMENT_OPERATOR |        =        |
-|       INTEGER       |        2        |
-|  TERMINATING_SYMBOL |        ;        |
-|       KEYWORD       |        if       |
-|     PARENTHESIS     |        (        |
-|      IDENTIFIER     |        x        |
-| RELATIONAL_OPERATOR |        >        |
-|      IDENTIFIER     |        y        |
-|     PARENTHESIS     |        )        |
-|     PARENTHESIS     |        {        |
-|       KEYWORD       |      print      |
-|     PARENTHESIS     |        (        |
-|    STRING_LITERAL   |   x is greater  |
-|     PARENTHESIS     |        )        |
-|  TERMINATING_SYMBOL |        ;        |
-|     PARENTHESIS     |        }        |
-|       KEYWORD       |       else      |
-|     PARENTHESIS     |        {        |
-|       KEYWORD       |      print      |
-|     PARENTHESIS     |        (        |
-|    STRING_LITERAL   |   y is greater  |
-|     PARENTHESIS     |        )        |
-|  TERMINATING_SYMBOL |        ;        |
-|     PARENTHESIS     |        }        |
-|      DATA_TYPE      |     boolean     |
-|      IDENTIFIER     |       flag      |
-| ASSIGNMENT_OPERATOR |        =        |
-|       BOOLEAN       |       true      |
-|  TERMINATING_SYMBOL |        ;        |
-+---------------------+-----------------+
++---------------------+----------------------+
+| Token Specification |        Tokens        |
++---------------------+----------------------+
+|       COMMENT       |     identifiers      |
+|      IDENTIFIER     |  ThisIsAnIdentifer   |
+|      IDENTIFIER     |        My_Num        |
+|      IDENTIFIER     |         Num          |
+|      IDENTIFIER     |        num09         |
+|       COMMENT       | assignment operators |
+| ASSIGNMENT_OPERATOR |          =           |
+| ASSIGNMENT_OPERATOR |          +=          |
+| ASSIGNMENT_OPERATOR |          -=          |
+| ASSIGNMENT_OPERATOR |          *=          |
+| ASSIGNMENT_OPERATOR |          /=          |
+| ASSIGNMENT_OPERATOR |          %=          |
+| ASSIGNMENT_OPERATOR |          ~=          |
+| ASSIGNMENT_OPERATOR |         **=          |
+| ASSIGNMENT_OPERATOR |          &=          |
+| ASSIGNMENT_OPERATOR |          `=          |
+| ASSIGNMENT_OPERATOR |          ^=          |
+| ASSIGNMENT_OPERATOR |         <<=          |
+| RELATIONAL_OPERATOR |          >=          |
+|       COMMENT       | arithmetic operators |
+|       INTEGER       |          1           |
+| ARITHMETIC_OPERATOR |          +           |
+|       INTEGER       |          1           |
+|       INTEGER       |          1           |
+| ARITHMETIC_OPERATOR |          -           |
+|       INTEGER       |          1           |
+| ARITHMETIC_OPERATOR |          *           |
+| ARITHMETIC_OPERATOR |          /           |
+| ARITHMETIC_OPERATOR |          %           |
+| ARITHMETIC_OPERATOR |          **          |
+|     PARENTHESIS     |          (           |
+|      IDENTIFIER     |          x           |
+| ARITHMETIC_OPERATOR |          +           |
+|      IDENTIFIER     |          y           |
+|     PARENTHESIS     |          )           |
+| ARITHMETIC_OPERATOR |          *           |
+|    UNARY_OPERATOR   |          -           |
+|      IDENTIFIER     |          z           |
++---------------------+----------------------+
 
 ----------- Errors Table ------------
 No errors found.

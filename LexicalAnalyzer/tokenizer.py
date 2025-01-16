@@ -138,6 +138,14 @@ class Lexer:
                 else:
                     tokens.append(comment_token)
 
+            elif self.current_char in SYMBOLS:  # Prioritize symbols (e.g., -=, +=)
+                token_or_error = self.make_symbol()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)  # Collect errors
+                else:
+                    tokens.append(token_or_error)
+
+
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 token_or_error = self.make_number()
                 if isinstance(token_or_error, Error):
@@ -210,14 +218,11 @@ class Lexer:
             num_str += self.current_char
             self.advance()
 
+        # Check for invalid trailing characters
         if self.current_char is not None and self.current_char in ALPHABETS + '_':
-            invalid_token = num_str + self.current_char
-            self.advance()
-            while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
-                invalid_token += self.current_char
-                self.advance()
-            return IllegalCharError(pos_start, self.pos, f"Invalid number or identifier '{invalid_token}'")
+            return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str + self.current_char}'")
 
+        # Return appropriate token
         try:
             if has_decimal:
                 token = Token('REAL_NUMBER', float(num_str))
@@ -233,13 +238,14 @@ class Lexer:
         id_str = ''
         pos_start = self.pos.copy()
 
-        if self.current_char is not None and self.current_char in ALPHABETS:
-            id_str += self.current_char
-            self.advance()
-        else:
+        if self.current_char is None or self.current_char not in ALPHABETS:
+            # Collect the invalid identifier until the first non-identifier character
+            while self.current_char is not None and self.current_char in ALPHABETS + DIGITS + '_':
+                id_str += self.current_char
+                self.advance()
             pos_end = self.pos.copy()
             return IllegalCharError(pos_start, pos_end, 
-                f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
+                                    f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
 
         while self.current_char is not None and (
             self.current_char in ALPHABETS + DIGITS + '_' or self.current_char == '.'):
@@ -308,11 +314,7 @@ class Lexer:
         symbol_str = self.current_char
         self.advance()
 
-        if symbol_str == '+' or symbol_str == '-':
-            if self.current_char == symbol_str: 
-                symbol_str += self.current_char
-                self.advance()
-
+        # Check for multi-character symbols first
         while self.current_char is not None and (
             symbol_str + self.current_char
         ) in (
@@ -325,23 +327,30 @@ class Lexer:
         ):
             symbol_str += self.current_char
             self.advance()
-        
-        if symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
-            return Token('ACCESSOR_SYMBOL', symbol_str)
-        if symbol_str == '++':
-            token = Token('UNARY_OPERATOR', '++')
-        elif symbol_str == '--':
-            token = Token('UNARY_OPERATOR', '--')
-        elif symbol_str == '-':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str)
-        elif symbol_str == '+':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str)
+
+        # Determine token type based on context
+        if symbol_str in ASSIGNMENT_OPERATORS:
+            token = Token('ASSIGNMENT_OPERATOR', symbol_str)
+        elif symbol_str in ['+', '-']:
+            if self.prev_token_type in ['IDENTIFIER', 'INTEGER', 'REAL_NUMBER', 'CLOSING_PARENTHESIS']:
+                # Treat as arithmetic operator if it follows an operand
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+            elif self.prev_token_type in ['ARITHMETIC_OPERATOR', 'UNARY_OPERATOR', None]:
+                # Treat as unary operator in other contexts
+                token = Token('UNARY_OPERATOR', symbol_str)
+            else:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)  # Fallback to arithmetic
+        elif symbol_str in ['++', '--']:
+            if self.prev_token_type in ['IDENTIFIER', 'CLOSING_PARENTHESIS']:
+                # Treat as arithmetic if it follows an operand
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+            else:
+                # Default to unary
+                token = Token('UNARY_OPERATOR', symbol_str)
         elif symbol_str in ARITHMETIC_OPERATORS:
             token = Token('ARITHMETIC_OPERATOR', symbol_str)
         elif symbol_str in RELATIONAL_OPERATORS:
             token = Token('RELATIONAL_OPERATOR', symbol_str)
-        elif symbol_str in ASSIGNMENT_OPERATORS:
-            token = Token('ASSIGNMENT_OPERATOR', symbol_str)
         elif symbol_str in BITWISE_OPERATORS:
             token = Token('BITWISE_OPERATOR', symbol_str)
         elif symbol_str in LOGICAL_OPERATORS:
@@ -354,11 +363,16 @@ class Lexer:
             token = Token('SEPARATING_SYMBOL', symbol_str)
         elif symbol_str in PARENTHESIS:
             token = Token('PARENTHESIS', symbol_str)
+        elif symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
+            token = Token('ACCESSOR_SYMBOL', symbol_str)
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  
+        # Save the token type for context-sensitive parsing
+        self.prev_token_type = token.type
         return token
+
+
 
     def make_comment(self):
         pos_start = self.pos.copy()
