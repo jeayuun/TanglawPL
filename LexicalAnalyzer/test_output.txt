@@ -1,307 +1,264 @@
 --------------- Input ---------------
-# identifiers #
-ThisIsAnIdentifer
-My_Num
-Num
-num09
-
-# assignment operators #
-=
-+=
--=
-*=
-/=
-%=
-~=
-**=
-&=
-`=
-^=
-<<=
->=
-
-# arithmetic operators # 
-(x + y) * -z
-*
-/
-%
-**
-
-# boolean operators # 
-!
-&&
-||
-==
-!=
-
-# bitwise operators #
-&
-`
-^
-~
-<<
->>
-
-# keywords # 
-break
-case
-catch
-class
-const
-continue
-def
-default
-do
-each
-else
-extends
-finally
-for
-if
-implements
-import
-input
-main
-new
-package
-print
-private
-protected
-public
-repeat
-return
-static
-switch
-this
-throw
-throws
-try
-while
-
-# reserved words # 
-areaOf
-circle
-circumference
-cm
-cubic
-distance
-fetch
-ft
-height
-in
-kg
-km
-l
-lbs
-length
-m
-mg
-mm
-perimeterOf
-radius
-rectangle
-setprecision
-side
-sphere
-sq
-square
-triangle
-volumeOf
-width
-
-# noise word #
-ant
-ine
-
-# constant values #
-0 
-3.14 
-2.718281828459045 
-"infinity" 
-'i' 
-true 
-
-# comments #
-# this is a single line comment #
-## this is multi-line 
-comment ##
-
-# delimiters and bracket #
-;
-,
-: 
-#"#
-#"#
-#'#
-#'#
-{
+int choice;
+ 
+println("Choose an option: \n
+   1. Calculate the Area of Square\n
+   2. Calculate the Area of Rectangle\n
+   3. Calculate the Area of Triangle\n
+   4. Exit\n");
+ 
+if(choice == 1) {
+   println("Enter the side length of the square:");
+   define side S(cm) = input();
+  
+   def ASqauare(m) = areaOf.square(S);
+  
+   println("The area of the square is {ASqauare} square meters.");
 }
-[
-]
-(
-)
-
-# invalids #
-_Name
-143c
-'Aa'
-_volumeOfcircle
-
-
-
-
+else if(choice == 2) {
+   println("Enter the length of the rectangle:");
+   length L(cm) = input();
+  
+   println("Enter the width of the rectangle:");
+   width W(cm) = input();
+ 
+   ARectangle(m) = areaOf.Rectangle(L,W);
+  
+   println("The area of the rectangle is {ARectangle} square meters.");
+}
+else if(choice == 3) {
+   println("Enter the base length of the triangle:");
+   base B(cm) = input();
+  
+   println("Enter the height of the triangle:");
+   height H(cm)= input();
+  
+   ATriangle(m) = areaOf.triangle(B,H);
+  
+   println("The area of the triangle is {ATriangle} square meters.");
+}
+ 
+else if(choice == 4) {
+   println("Exiting the program.");
+}
+else {
+   println("Invalid choice. Please select a valid option.");
+}
 
 ----------- Tokens Table ------------
-+---------------------+-------------------------------+
-| Token Specification |             Tokens            |
-+---------------------+-------------------------------+
-|       COMMENT       |          identifiers          |
-|      IDENTIFIER     |       ThisIsAnIdentifer       |
-|      IDENTIFIER     |             My_Num            |
-|      IDENTIFIER     |              Num              |
-|      IDENTIFIER     |             num09             |
-|       COMMENT       |      assignment operators     |
-| ASSIGNMENT_OPERATOR |               =               |
-| ASSIGNMENT_OPERATOR |               +=              |
-| ASSIGNMENT_OPERATOR |               -=              |
-| ASSIGNMENT_OPERATOR |               *=              |
-| ASSIGNMENT_OPERATOR |               /=              |
-| ASSIGNMENT_OPERATOR |               %=              |
-| ASSIGNMENT_OPERATOR |               ~=              |
-| ASSIGNMENT_OPERATOR |              **=              |
-| ASSIGNMENT_OPERATOR |               &=              |
-| ASSIGNMENT_OPERATOR |               `=              |
-| ASSIGNMENT_OPERATOR |               ^=              |
-| ASSIGNMENT_OPERATOR |              <<=              |
-| RELATIONAL_OPERATOR |               >=              |
-|       COMMENT       |      arithmetic operators     |
-|     PARENTHESIS     |               (               |
-|      IDENTIFIER     |               x               |
-| ARITHMETIC_OPERATOR |               +               |
-|      IDENTIFIER     |               y               |
-|     PARENTHESIS     |               )               |
-| ARITHMETIC_OPERATOR |               *               |
-|    UNARY_OPERATOR   |               -               |
-|      IDENTIFIER     |               z               |
-| ARITHMETIC_OPERATOR |               *               |
-| ARITHMETIC_OPERATOR |               /               |
-| ARITHMETIC_OPERATOR |               %               |
-| ARITHMETIC_OPERATOR |               **              |
-|       COMMENT       |       boolean operators       |
-|   LOGICAL_OPERATOR  |               !               |
-|   LOGICAL_OPERATOR  |               &&              |
-|   LOGICAL_OPERATOR  |               ||              |
-| RELATIONAL_OPERATOR |               ==              |
-| RELATIONAL_OPERATOR |               !=              |
-|       COMMENT       |       bitwise operators       |
-|   BITWISE_OPERATOR  |               &               |
-|   BITWISE_OPERATOR  |               `               |
-|   BITWISE_OPERATOR  |               ^               |
-|   BITWISE_OPERATOR  |               ~               |
-|   BITWISE_OPERATOR  |               <<              |
-|   BITWISE_OPERATOR  |               >>              |
-|       COMMENT       |            keywords           |
-|       KEYWORD       |             break             |
-|       KEYWORD       |              case             |
-|       KEYWORD       |             catch             |
-|       KEYWORD       |             class             |
-|       KEYWORD       |             const             |
-|       KEYWORD       |            continue           |
-|       KEYWORD       |              def              |
-|       KEYWORD       |            default            |
-|       KEYWORD       |               do              |
-|       KEYWORD       |              each             |
-|       KEYWORD       |              else             |
-|       KEYWORD       |            extends            |
-|       KEYWORD       |            finally            |
-|       KEYWORD       |              for              |
-|       KEYWORD       |               if              |
-|       KEYWORD       |           implements          |
-|       KEYWORD       |             import            |
-|       KEYWORD       |             input             |
-|       KEYWORD       |              main             |
-|       KEYWORD       |              new              |
-|       KEYWORD       |            package            |
-|       KEYWORD       |             print             |
-|       KEYWORD       |            private            |
-|       KEYWORD       |           protected           |
-|       KEYWORD       |             public            |
-|       KEYWORD       |             repeat            |
-|       KEYWORD       |             return            |
-|       KEYWORD       |             static            |
-|       KEYWORD       |             switch            |
-|       KEYWORD       |              this             |
-|       KEYWORD       |             throw             |
-|       KEYWORD       |             throws            |
-|       KEYWORD       |              try              |
-|       KEYWORD       |             while             |
-|       COMMENT       |         reserved words        |
-|    RESERVED_WORD    |             areaOf            |
-|    RESERVED_WORD    |             circle            |
-|    RESERVED_WORD    |         circumference         |
-|    RESERVED_WORD    |               cm              |
-|    RESERVED_WORD    |             cubic             |
-|    RESERVED_WORD    |            distance           |
-|    RESERVED_WORD    |             fetch             |
-|    RESERVED_WORD    |               ft              |
-|    RESERVED_WORD    |             height            |
-|    RESERVED_WORD    |               in              |
-|    RESERVED_WORD    |               kg              |
-|    RESERVED_WORD    |               km              |
-|    RESERVED_WORD    |               l               |
-|    RESERVED_WORD    |              lbs              |
-|    RESERVED_WORD    |             length            |
-|    RESERVED_WORD    |               m               |
-|    RESERVED_WORD    |               mg              |
-|    RESERVED_WORD    |               mm              |
-|    RESERVED_WORD    |          perimeterOf          |
-|    RESERVED_WORD    |             radius            |
-|    RESERVED_WORD    |           rectangle           |
-|    RESERVED_WORD    |          setprecision         |
-|    RESERVED_WORD    |              side             |
-|    RESERVED_WORD    |             sphere            |
-|    RESERVED_WORD    |               sq              |
-|    RESERVED_WORD    |             square            |
-|    RESERVED_WORD    |            triangle           |
-|    RESERVED_WORD    |            volumeOf           |
-|    RESERVED_WORD    |             width             |
-|       COMMENT       |           noise word          |
-|      NOISE_WORD     |              ant              |
-|      NOISE_WORD     |              ine              |
-|       COMMENT       |        constant values        |
-|       INTEGER       |               0               |
-|     REAL_NUMBER     |              3.14             |
-|     REAL_NUMBER     |       2.718281828459045       |
-|    STRING_LITERAL   |            infinity           |
-|  CHARACTER_LITERAL  |               i               |
-|       BOOLEAN       |              true             |
-|       COMMENT       |            comments           |
-|       COMMENT       | this is a single line comment |
-|       COMMENT       |      this is multi-line       |
-|                     |            comment            |
-|       COMMENT       |     delimiters and bracket    |
-|  TERMINATING_SYMBOL |               ;               |
-|  SEPARATING_SYMBOL  |               ,               |
-|    SPECIAL_SYMBOL   |               :               |
-|       COMMENT       |               "               |
-|       COMMENT       |               "               |
-|       COMMENT       |               '               |
-|       COMMENT       |               '               |
-|     PARENTHESIS     |               {               |
-|     PARENTHESIS     |               }               |
-|     PARENTHESIS     |               [               |
-|     PARENTHESIS     |               ]               |
-|     PARENTHESIS     |               (               |
-|     PARENTHESIS     |               )               |
-|       COMMENT       |            invalids           |
-+---------------------+-------------------------------+
++---------------------+-----------------------------------------------+
+| Token Specification |                     Tokens                    |
++---------------------+-----------------------------------------------+
+|      DATA_TYPE      |                      int                      |
+|      IDENTIFIER     |                     choice                    |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |               Choose an option:               |
+|                     |                                               |
+|                     |          1. Calculate the Area of Square      |
+|                     |                                               |
+|                     |        2. Calculate the Area of Rectangle     |
+|                     |                                               |
+|                     |         3. Calculate the Area of Triangle     |
+|                     |                                               |
+|                     |                      4. Exit                  |
+|                     |                                               |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                       if                      |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                     choice                    |
+| RELATIONAL_OPERATOR |                       ==                      |
+|       INTEGER       |                       1                       |
+|     PARENTHESIS     |                       )                       |
+|     PARENTHESIS     |                       {                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |      Enter the side length of the square:     |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                      def                      |
+|    RESERVED_WORD    |                      side                     |
+|      IDENTIFIER     |                       S                       |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       cm                      |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|       KEYWORD       |                     input                     |
+|     PARENTHESIS     |                       (                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                      def                      |
+|      IDENTIFIER     |                    ASqauare                   |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       m                       |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|    RESERVED_WORD    |                     areaOf                    |
+|   ACCESSOR_SYMBOL   |                       .                       |
+|    RESERVED_WORD    |                     square                    |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                       S                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |           The area of the square is           |
+|     PARENTHESIS     |                       {                       |
+|      IDENTIFIER     |                    ASqauare                   |
+|     PARENTHESIS     |                       }                       |
+|    STRING_LITERAL   |                 square meters.                |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|     PARENTHESIS     |                       }                       |
+|       KEYWORD       |                      else                     |
+|       KEYWORD       |                       if                      |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                     choice                    |
+| RELATIONAL_OPERATOR |                       ==                      |
+|       INTEGER       |                       2                       |
+|     PARENTHESIS     |                       )                       |
+|     PARENTHESIS     |                       {                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |       Enter the length of the rectangle:      |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|    RESERVED_WORD    |                     length                    |
+|      IDENTIFIER     |                       L                       |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       cm                      |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|       KEYWORD       |                     input                     |
+|     PARENTHESIS     |                       (                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |       Enter the width of the rectangle:       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|    RESERVED_WORD    |                     width                     |
+|      IDENTIFIER     |                       W                       |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       cm                      |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|       KEYWORD       |                     input                     |
+|     PARENTHESIS     |                       (                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|      IDENTIFIER     |                   ARectangle                  |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       m                       |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|    RESERVED_WORD    |                     areaOf                    |
+|   ACCESSOR_SYMBOL   |                       .                       |
+|      IDENTIFIER     |                   Rectangle                   |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                       L                       |
+|  SEPARATING_SYMBOL  |                       ,                       |
+|      IDENTIFIER     |                       W                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |         The area of the rectangle is          |
+|     PARENTHESIS     |                       {                       |
+|      IDENTIFIER     |                   ARectangle                  |
+|     PARENTHESIS     |                       }                       |
+|    STRING_LITERAL   |                 square meters.                |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|     PARENTHESIS     |                       }                       |
+|       KEYWORD       |                      else                     |
+|       KEYWORD       |                       if                      |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                     choice                    |
+| RELATIONAL_OPERATOR |                       ==                      |
+|       INTEGER       |                       3                       |
+|     PARENTHESIS     |                       )                       |
+|     PARENTHESIS     |                       {                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |     Enter the base length of the triangle:    |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|    RESERVED_WORD    |                      base                     |
+|      IDENTIFIER     |                       B                       |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       cm                      |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|       KEYWORD       |                     input                     |
+|     PARENTHESIS     |                       (                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |       Enter the height of the triangle:       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|    RESERVED_WORD    |                     height                    |
+|      IDENTIFIER     |                       H                       |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       cm                      |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|       KEYWORD       |                     input                     |
+|     PARENTHESIS     |                       (                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|      IDENTIFIER     |                   ATriangle                   |
+|     PARENTHESIS     |                       (                       |
+|    RESERVED_WORD    |                       m                       |
+|     PARENTHESIS     |                       )                       |
+| ASSIGNMENT_OPERATOR |                       =                       |
+|    RESERVED_WORD    |                     areaOf                    |
+|   ACCESSOR_SYMBOL   |                       .                       |
+|    RESERVED_WORD    |                    triangle                   |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                       B                       |
+|  SEPARATING_SYMBOL  |                       ,                       |
+|      IDENTIFIER     |                       H                       |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |          The area of the triangle is          |
+|     PARENTHESIS     |                       {                       |
+|      IDENTIFIER     |                   ATriangle                   |
+|     PARENTHESIS     |                       }                       |
+|    STRING_LITERAL   |                 square meters.                |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|     PARENTHESIS     |                       }                       |
+|       KEYWORD       |                      else                     |
+|       KEYWORD       |                       if                      |
+|     PARENTHESIS     |                       (                       |
+|      IDENTIFIER     |                     choice                    |
+| RELATIONAL_OPERATOR |                       ==                      |
+|       INTEGER       |                       4                       |
+|     PARENTHESIS     |                       )                       |
+|     PARENTHESIS     |                       {                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   |              Exiting the program.             |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|     PARENTHESIS     |                       }                       |
+|       KEYWORD       |                      else                     |
+|     PARENTHESIS     |                       {                       |
+|       KEYWORD       |                    println                    |
+|     PARENTHESIS     |                       (                       |
+|    STRING_LITERAL   | Invalid choice. Please select a valid option. |
+|     PARENTHESIS     |                       )                       |
+|  TERMINATING_SYMBOL |                       ;                       |
+|     PARENTHESIS     |                       }                       |
++---------------------+-----------------------------------------------+
 
 ----------- Errors Table ------------
-+-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
-|     Error Type    |                                                   Details                                                    |      Location      |
-+-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
-| Illegal Character |             'Invalid identifier '_Name' (Identifiers must begin with a letter).' is not allowed.             | Line 144, Column 1 |
-|   Invalid Number  |                     Invalid number '143c'. Numbers cannot contain alphabetic characters.                     | Line 145, Column 1 |
-| Illegal Character | 'Character literal 'Aa' is invalid. A character literal must contain exactly one character.' is not allowed. | Line 146, Column 1 |
-| Illegal Character |        'Invalid identifier '_volumeOfcircle' (Identifiers must begin with a letter).' is not allowed.        | Line 147, Column 1 |
-+-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
+No errors found.

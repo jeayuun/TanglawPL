@@ -1,5 +1,4 @@
 import tokenizer
-import os
 from pathlib import Path
 from prettytable import PrettyTable
 
@@ -13,7 +12,7 @@ def process_file(filename):
         input_filepath = downloads_folder / filename
 
         if not input_filepath.exists():
-            print(f"Error: The file '{input_filepath}' does not exist in the Downloads folder.")
+            print(f"\nError: The file '{input_filepath}' does not exist in the Downloads folder.")
             return
 
         with open(input_filepath, 'r') as file:
@@ -21,16 +20,12 @@ def process_file(filename):
 
         tokens, errors = tokenizer.run(filename, text)
 
-        # Output file location
         output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
-        # Write results to the output file
         with open(output_filename, 'w') as output_file:
-            # Input Section
             output_file.write("--------------- Input ---------------\n")
             output_file.write(text + "\n\n")
 
-            # Tokens Table
             output_file.write("----------- Tokens Table ------------\n")
             token_table = PrettyTable()
             token_table.field_names = ["Token Specification", "Tokens"]
@@ -40,7 +35,6 @@ def process_file(filename):
 
             output_file.write(token_table.get_string() + "\n\n")
 
-            # Errors Table
             output_file.write("----------- Errors Table ------------\n")
             if errors:
                 error_table = PrettyTable()
