@@ -146,11 +146,14 @@ class Lexer:
                     tokens.append(token_or_error)
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
-                token = self.make_identifier_or_keyword()
-                if isinstance(token, Error):
-                    errors.append(token)  # Collect errors
+                token_or_tokens = self.make_identifier_or_keyword()
+                if isinstance(token_or_tokens, list):  # Handle multiple tokens
+                    tokens.extend(token_or_tokens)
+                elif isinstance(token_or_tokens, Error):
+                    errors.append(token_or_tokens)
                 else:
-                    tokens.append(token)
+                    tokens.append(token_or_tokens)
+
 
             elif self.current_char == '"':
                 token = self.make_string()
@@ -238,16 +241,19 @@ class Lexer:
             return IllegalCharError(pos_start, pos_end, 
                 f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
 
-        while self.current_char is not None and self.current_char not in set(WHITESPACE).union(set(SYMBOLS)):
+        while self.current_char is not None and (
+            self.current_char in ALPHABETS + DIGITS + '_' or self.current_char == '.'):
+            if self.current_char == '.':
+                # Handle the dot as a separate token
+                if id_str in RESERVED_WORDS or id_str in KEYWORDS:
+                    token = Token('RESERVED_WORDS', id_str)
+                else:
+                    token = Token('IDENTIFIER', id_str)
+                self.prev_token_type = token.type
+                self.advance()
+                return [token, Token('ACCESSOR_SYMBOL', '.')]  # Return as a pair of tokens
             id_str += self.current_char
             self.advance()
-        
-        if self.current_char == '.':
-            return Token('RESERVED_WORDS', id_str) if id_str in RESERVED_WORDS else Token('IDENTIFIER', id_str)
-    
-        if not all(char in ALPHABETS + DIGITS + '_' for char in id_str):
-            return IllegalCharError(pos_start, self.pos, 
-                f"Invalid identifier '{id_str}' (Identifiers can only include letters, digits, and underscores).")
 
         if id_str in DATA_TYPES:
             return Token('DATA_TYPE', id_str)
@@ -307,7 +313,6 @@ class Lexer:
                 symbol_str += self.current_char
                 self.advance()
 
-        # Handle other symbols normally
         while self.current_char is not None and (
             symbol_str + self.current_char
         ) in (
@@ -352,7 +357,7 @@ class Lexer:
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  # Update `prev_token_type`
+        self.prev_token_type = token.type  
         return token
 
     def make_comment(self):
@@ -417,25 +422,11 @@ def run(fn, text):
     for error in errors:
         print(error.as_string())
 
-    # if error:
-    #     return [], error.as_string()
-
-    # symbol_table = {}
-    
-
-    # for token in tokens:
-    #     if isinstance(token, Error):  # Skip errors
-    #         continue
-    #     if token.type not in symbol_table:
-    #         symbol_table[token.type] = []
-    #     symbol_table[token.type].append(token.value)
-
     output_filepath = f"{fn.replace('.lit', '_output.txt')}"
     with open(output_filepath, "w") as f:
         f.write("--------------- Input ---------------\n")
         f.write(text + "\n\n")
 
-        # Tokens Table
         f.write("----------- Tokens Table ------------\n")
         token_table = PrettyTable()
         token_table.field_names = ["Token Specification", "Tokens"]
@@ -448,7 +439,6 @@ def run(fn, text):
         f.write(token_table.get_string())
         f.write("\n\n")
 
-        # Errors Table
         f.write("----------- Errors Table ------------\n")
         if errors:
             error_table = PrettyTable()

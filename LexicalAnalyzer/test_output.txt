@@ -16,8 +16,14 @@ boolean flag = true;
 +---------------------+-----------------+
 |      IDENTIFIER     |      volume     |
 |     PARENTHESIS     |        (        |
+|    RESERVED_WORDS   |      cubic      |
+|   ACCESSOR_SYMBOL   |        .        |
+|    RESERVED_WORDS   |        m        |
 |     PARENTHESIS     |        )        |
 | ASSIGNMENT_OPERATOR |        =        |
+|    RESERVED_WORDS   |     volumeOf    |
+|   ACCESSOR_SYMBOL   |        .        |
+|    RESERVED_WORDS   |      sphere     |
 |     PARENTHESIS     |        (        |
 |       INTEGER       |        10       |
 |     PARENTHESIS     |        )        |
@@ -64,9 +70,4 @@ boolean flag = true;
 +---------------------+-----------------+
 
 ----------- Errors Table ------------
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+-------------------+
-|     Error Type    |                                                         Details                                                         |      Location     |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+-------------------+
-| Illegal Character |     'Invalid identifier 'cubic.m' (Identifiers can only include letters, digits, and underscores).' is not allowed.     |  Line 1, Column 8 |
-| Illegal Character | 'Invalid identifier 'volumeOf.sphere' (Identifiers can only include letters, digits, and underscores).' is not allowed. | Line 1, Column 19 |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+-------------------+
+No errors found.

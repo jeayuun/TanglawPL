@@ -1,4 +1,5 @@
-int x = 10 - -2; \t #example comment#
+volume(cubic.m) = volumeOf.sphere(10);
+int x = 10 - -2;    #example comment#
 int y = 2;
 if (x > y) {
     print("x is greater");
