@@ -405,7 +405,7 @@ class Lexer:
                     tokens.append(Token('PARENTHESIS', '}'))  
                     self.advance()
                 else:
-                    return UnclosedStringError(pos_start, self.pos)  
+                    return UnclosedStringError(pos_start, self.pos, "String literal was not closed.")
             else:
                 str_val += self.current_char  
             self.advance()
@@ -413,6 +413,7 @@ class Lexer:
         if str_val:  
             tokens.append(Token('STRING_LITERAL', str_val))
         return tokens
+        
 
     def make_character(self):
         pos_start = self.pos.copy()
