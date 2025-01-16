@@ -139,10 +139,11 @@ class Lexer:
                     tokens.append(comment_token)
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
-                try:
-                    tokens.append(self.make_number())
-                except InvalidNumberError as e:
-                    errors.append(e) 
+                token_or_error = self.make_number()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)  # Collect errors
+                else:
+                    tokens.append(token_or_error)
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
                 token = self.make_identifier_or_keyword()
@@ -414,7 +415,7 @@ def run(fn, text):
     tokens, errors = lexer.make_tokens()
 
     for error in errors:
-        print(error.as_string())  # Print detailed error information
+        print(error.as_string())
 
     # if error:
     #     return [], error.as_string()
@@ -429,10 +430,12 @@ def run(fn, text):
     #         symbol_table[token.type] = []
     #     symbol_table[token.type].append(token.value)
 
-    with open("symbol_table.txt", "w") as f:
+    output_filepath = f"{fn.replace('.lit', '_output.txt')}"
+    with open(output_filepath, "w") as f:
         f.write("--------------- Input ---------------\n")
         f.write(text + "\n\n")
-        
+
+        # Tokens Table
         f.write("----------- Tokens Table ------------\n")
         token_table = PrettyTable()
         token_table.field_names = ["Token Specification", "Tokens"]
@@ -442,35 +445,22 @@ def run(fn, text):
                 continue
             token_table.add_row([token.type, token.value])
 
-        
         f.write(token_table.get_string())
         f.write("\n\n")
 
+        # Errors Table
         f.write("----------- Errors Table ------------\n")
         if errors:
             error_table = PrettyTable()
             error_table.field_names = ["Error Type", "Details", "Location"]
             for error in errors:
-                error_table.add_row(
-                    [
-                        error.error_name,
-                        error.details,
-                        f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}",
-                    ]
-                )
+                error_table.add_row([
+                    error.error_name,
+                    error.details,
+                    f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
+                ])
             f.write(error_table.get_string())
         else:
             f.write("No errors found.\n")
-
-        # f.write("----------- Symbol Table ------------\n")
-        # symbol_table_table = PrettyTable()
-        # symbol_table_table.field_names = ["Token Specification", "Tokens"]
-
-        # for token_type, values in symbol_table.items():
-        #     symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
-
-        # f.write(symbol_table_table.get_string())
-
-        
 
     return tokens, errors
