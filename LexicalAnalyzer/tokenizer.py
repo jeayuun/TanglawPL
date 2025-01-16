@@ -13,8 +13,8 @@ KEYWORDS = [
     'if', 'else', 'return', 'main', 'case', 'try', 'catch', 'do', 'while',
     'for', 'each', 'import', 'implements', 'switch', 'throw', 'throws',
     'this', 'public', 'protected', 'private', 'new', 'package', 'break',
-    'repeat', 'def', 'print', 'input', 'continue', 'default', 'const',
-    'extends', 'finally', 'static'
+    'repeat', 'def', 'print', 'println', 'input', 'continue', 'default', 'const',
+    'extends', 'finally', 'static', 'class'
 ]
 RESERVED_WORDS = [
     'fetch', 'areaOf', 'circle', 'cubic', 'distance', 'ft', 'in', 'kg', 'km',
@@ -27,8 +27,8 @@ UNARY_OPERATORS = ['+', '-', '++', '--']
 RELATIONAL_OPERATORS = ['<', '>', '<=', '>=', '==', '!=']
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '~=', '**=', '&=', '`=', '^=', '<<=', '>>=']
 LOGICAL_OPERATORS = ['!', '&&', '||']
-BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '!']
-SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~']
+BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '~']
+SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~', '"', "'", '']
 ACCESSOR_SYMBOL = ['.']
 TERMINATING_SYMBOLS = [';']
 SEPARATING_SYMBOLS = [',']
@@ -40,7 +40,6 @@ NOISE_WORDS = ['ant', 'ine']
 #######################################
 #               ERRORS                #
 #######################################
-# To be edited
 
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
@@ -50,22 +49,24 @@ class Error:
         self.details = details
 
     def as_string(self):
-        result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col}'
+        result = f'{self.error_name}: {self.details}\n'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col + 1}'
         return result
 
+
 class IllegalCharError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Illegal Character', details)
+    def __init__(self, pos_start, pos_end, illegal_char):
+        super().__init__(pos_start, pos_end, 'Illegal Character', f"'{illegal_char}' is not allowed.")
+
 
 class UnclosedStringError(Error):
     def __init__(self, pos_start, pos_end):
         super().__init__(pos_start, pos_end, 'Unclosed String Literal', 'String literal was not closed.')
 
+
 class InvalidNumberError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
-        self.type = 'ERROR' 
 
 #######################################
 #              POSITION               #
@@ -124,38 +125,62 @@ class Lexer:
 
     def make_tokens(self):
         tokens = []
+        errors = []
 
         while self.current_char is not None:
             if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
                 self.advance()
-                if self.current_char == '\\' and self.peek() in 'tnv':  
-                    self.advance() 
-                    self.advance()  
 
             elif self.current_char == '#':
                 comment_token = self.make_comment()
-                if isinstance(comment_token, Error):  
-                    return [], comment_token
+                if isinstance(comment_token, Error):
+                    errors.append(comment_token) 
+                else:
+                    tokens.append(comment_token)
+
+            elif self.current_char in SYMBOLS: 
+                token_or_error = self.make_symbol()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error) 
+                else:
+                    tokens.append(token_or_error)
+
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
-                try:
-                    tokens.append(self.make_number())
-                except InvalidNumberError as e:
-                    return [], e 
+                token_or_error = self.make_number()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)  
+                else:
+                    tokens.append(token_or_error)
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
-                tokens.append(self.make_identifier_or_keyword())
+                token_or_tokens = self.make_identifier_or_keyword()
+                if isinstance(token_or_tokens, list):  
+                    tokens.extend(token_or_tokens)
+                elif isinstance(token_or_tokens, Error):
+                    errors.append(token_or_tokens)
+                else:
+                    tokens.append(token_or_tokens)
+
 
             elif self.current_char == '"':
-                tokens.append(self.make_string())
+                token = self.make_string()
+                if isinstance(token, Error):
+                    errors.append(token) 
+                else:
+                    tokens.append(token)
 
             elif self.current_char == "'":
-                tokens.append(self.make_character())
+                token = self.make_character()
+                if isinstance(token, Error):
+                    errors.append(token) 
+                else:
+                    tokens.append(token)
 
             elif self.current_char in SYMBOLS:
                 token_or_error = self.make_symbol()
-                if isinstance(token_or_error, IllegalCharError):
-                    print(f"Error: {token_or_error.as_string()}")  # Log errors and skip
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)  
                 else:
                     tokens.append(token_or_error)
 
@@ -163,9 +188,9 @@ class Lexer:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
+                errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, None
+        return tokens, errors
 
     def peek(self):
         peek_pos = self.pos.idx + 1
@@ -188,18 +213,16 @@ class Lexer:
         while self.current_char is not None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
                 if has_decimal:
-                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str + self.current_char}'")
+                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Multiple decimal points detected.")
                 has_decimal = True
             num_str += self.current_char
             self.advance()
 
         if self.current_char is not None and self.current_char in ALPHABETS + '_':
-            invalid_token = num_str + self.current_char
-            self.advance()
-            while self.current_char is not None and (self.current_char in ALPHABETS + DIGITS + '_'):
-                invalid_token += self.current_char
+            while self.current_char is not None and self.current_char in ALPHABETS + '_':
+                num_str += self.current_char
                 self.advance()
-            return IllegalCharError(pos_start, self.pos, f"Invalid number or identifier '{invalid_token}'")
+            return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Numbers cannot contain alphabetic characters.")
 
         try:
             if has_decimal:
@@ -216,24 +239,26 @@ class Lexer:
         id_str = ''
         pos_start = self.pos.copy()
 
-        if self.current_char is not None and self.current_char in ALPHABETS:
-            id_str += self.current_char
-            self.advance()
-        else:
+        if self.current_char is None or self.current_char not in ALPHABETS:
+            while self.current_char is not None and self.current_char in ALPHABETS + DIGITS + '_':
+                id_str += self.current_char
+                self.advance()
             pos_end = self.pos.copy()
             return IllegalCharError(pos_start, pos_end, 
-                f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
+                                    f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
 
-        while self.current_char is not None and self.current_char not in set(WHITESPACE).union(set(SYMBOLS)):
+        while self.current_char is not None and (
+            self.current_char in ALPHABETS + DIGITS + '_' or self.current_char == '.'):
+            if self.current_char == '.':
+                if id_str in RESERVED_WORDS or id_str in KEYWORDS:
+                    token = Token('RESERVED_WORD', id_str)
+                else:
+                    token = Token('IDENTIFIER', id_str)
+                self.prev_token_type = token.type
+                self.advance()
+                return [token, Token('ACCESSOR_SYMBOL', '.')]  
             id_str += self.current_char
             self.advance()
-        
-        if self.current_char == '.':
-            return Token('RESERVED_WORDS', id_str) if id_str in RESERVED_WORDS else Token('IDENTIFIER', id_str)
-    
-        if not all(char in ALPHABETS + DIGITS + '_' for char in id_str):
-            return IllegalCharError(pos_start, self.pos, 
-                f"Invalid identifier '{id_str}' (Identifiers can only include letters, digits, and underscores).")
 
         if id_str in DATA_TYPES:
             return Token('DATA_TYPE', id_str)
@@ -242,7 +267,9 @@ class Lexer:
         elif id_str in KEYWORDS:
             return Token('KEYWORD', id_str)
         elif id_str in RESERVED_WORDS:
-            return Token('RESERVED_WORDS', id_str)
+            return Token('RESERVED_WORD', id_str)
+        elif id_str in NOISE_WORDS:
+            return Token('NOISE_WORD', id_str)
         else:
             return Token('IDENTIFIER', id_str)
     
@@ -269,50 +296,48 @@ class Lexer:
 
     def make_character(self):
         pos_start = self.pos.copy()
-        self.advance()  
+        self.advance() 
 
         if self.current_char is None or self.current_char == "'":
-            return IllegalCharError(pos_start, self.pos, "Empty character literal")
+            self.advance() 
+            return IllegalCharError(
+                pos_start,
+                self.pos,
+                "Character literal is empty. A character literal must contain exactly one character."
+            )
 
-        char_val = self.current_char  
+        char_val = self.current_char
+        self.advance()  
+
+        if self.current_char != "'":
+            if self.current_char is not None:
+                char_val += self.current_char 
+                self.advance()
+
+            if self.current_char != "'":
+                while self.current_char is not None and self.current_char != "'":
+                    self.advance()
+                return IllegalCharError(
+                    pos_start,
+                    self.pos,
+                    f"Unclosed character literal starting with '{char_val}'."
+                )
+            else:
+                self.advance()  
+                return IllegalCharError(
+                    pos_start,
+                    self.pos,
+                    f"Character literal '{char_val}' is invalid. A character literal must contain exactly one character."
+                )
 
         self.advance()  
-        if self.current_char != "'":  
-            return IllegalCharError(pos_start, self.pos, "Unclosed character literal")
-
-        self.advance() 
         return Token('CHARACTER_LITERAL', char_val)
 
     def make_symbol(self):
-    # edit for accessor symbol
         pos_start = self.pos.copy()
         symbol_str = self.current_char
         self.advance()
 
-        if symbol_str == '+' or symbol_str == '-':
-            if self.current_char == symbol_str: 
-                symbol_str += self.current_char
-                self.advance()
-
-        if symbol_str == ".":
-            # Ensure that the previous token was `RESERVED_WORDS`
-            if self.prev_token_type == "RESERVED_WORDS":
-                saved_pos = self.pos.copy()
-                next_identifier = self.make_identifier_or_keyword()
-
-                # Validate the next token after the dot is `RESERVED_WORDS`
-                if isinstance(next_identifier, Token) and next_identifier.type == "RESERVED_WORDS":
-                    self.prev_token_type = "ACCESSOR_SYMBOL"  # Set `prev_token_type` for next calls
-                    return Token("ACCESSOR_SYMBOL", ".")
-                else:
-                    # Restore position and raise an error if next is invalid
-                    self.pos = saved_pos
-                    self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
-                    return IllegalCharError(pos_start, self.pos, f"Invalid usage of accessor symbol '{symbol_str}'")
-
-            return IllegalCharError(pos_start, self.pos, f"Accessor symbol '{symbol_str}' must follow a reserved word")
-
-        # Handle other symbols normally
         while self.current_char is not None and (
             symbol_str + self.current_char
         ) in (
@@ -326,24 +351,23 @@ class Lexer:
             symbol_str += self.current_char
             self.advance()
 
-        if symbol_str == '++':
-            token = Token('UNARY_OPERATOR', '++')
-        elif symbol_str == '--':
-            token = Token('UNARY_OPERATOR', '--')
-        elif symbol_str == '-':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str)
-        elif symbol_str == '+':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str)
+        if symbol_str in ASSIGNMENT_OPERATORS:
+            token = Token('ASSIGNMENT_OPERATOR', symbol_str)
+        elif symbol_str in ['+', '-']:
+            if self.prev_token_type in ['IDENTIFIER', 'INTEGER', 'REAL_NUMBER', 'CLOSING_PARENTHESIS']:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+            elif self.prev_token_type in ['ARITHMETIC_OPERATOR', 'UNARY_OPERATOR', None]:
+                token = Token('UNARY_OPERATOR', symbol_str)
+            else:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)  
         elif symbol_str in ARITHMETIC_OPERATORS:
             token = Token('ARITHMETIC_OPERATOR', symbol_str)
         elif symbol_str in RELATIONAL_OPERATORS:
             token = Token('RELATIONAL_OPERATOR', symbol_str)
-        elif symbol_str in ASSIGNMENT_OPERATORS:
-            token = Token('ASSIGNMENT_OPERATOR', symbol_str)
-        elif symbol_str in BITWISE_OPERATORS:
-            token = Token('BITWISE_OPERATOR', symbol_str)
         elif symbol_str in LOGICAL_OPERATORS:
             token = Token('LOGICAL_OPERATOR', symbol_str)
+        elif symbol_str in BITWISE_OPERATORS:
+            token = Token('BITWISE_OPERATOR', symbol_str)
         elif symbol_str in SPECIAL_SYMBOLS:
             token = Token('SPECIAL_SYMBOL', symbol_str)
         elif symbol_str in TERMINATING_SYMBOLS:
@@ -352,10 +376,12 @@ class Lexer:
             token = Token('SEPARATING_SYMBOL', symbol_str)
         elif symbol_str in PARENTHESIS:
             token = Token('PARENTHESIS', symbol_str)
+        elif symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
+            token = Token('ACCESSOR_SYMBOL', symbol_str)
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
-        self.prev_token_type = token.type  # Update `prev_token_type`
+        self.prev_token_type = token.type
         return token
 
     def make_comment(self):
@@ -408,61 +434,47 @@ class Lexer:
 
 import os
 from prettytable import PrettyTable 
-#hihi
+
 
 def run(fn, text):
     if not fn.endswith('.lit'):
         return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
 
-    # input_text = "volume(cubic.m) = volumeOf.sphere(10);"
-
-    # lexer = Lexer("<stdin>", input_text)
-    # tokens, error = lexer.make_tokens()
-
-    # if error:
-    #     print("Error:", error.as_string())
-    # else:
-    #     print("Tokens:")
-    #     for token in tokens:
-    #         print(token)
-
-
     lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
+    tokens, errors = lexer.make_tokens()
 
-    if error:
-        return [], error.as_string()
+    for error in errors:
+        print(error.as_string())
 
-    symbol_table = {}
-
-    for token in tokens:
-        if isinstance(token, Error):  # Skip errors
-            continue
-        if token.type not in symbol_table:
-            symbol_table[token.type] = []
-        symbol_table[token.type].append(token.value)
-
-    with open("symbol_table.txt", "w") as f:
+    output_filepath = f"{fn.replace('.lit', '_output.txt')}"
+    with open(output_filepath, "w") as f:
         f.write("--------------- Input ---------------\n")
         f.write(text + "\n\n")
-        
+
         f.write("----------- Tokens Table ------------\n")
         token_table = PrettyTable()
         token_table.field_names = ["Token Specification", "Tokens"]
 
         for token in tokens:
+            if isinstance(token, Error):  # Skip errors
+                continue
             token_table.add_row([token.type, token.value])
-        
+
         f.write(token_table.get_string())
         f.write("\n\n")
 
-        f.write("----------- Symbol Table ------------\n")
-        symbol_table_table = PrettyTable()
-        symbol_table_table.field_names = ["Token Specification", "Tokens"]
+        f.write("----------- Errors Table ------------\n")
+        if errors:
+            error_table = PrettyTable()
+            error_table.field_names = ["Error Type", "Details", "Location"]
+            for error in errors:
+                error_table.add_row([
+                    error.error_name,
+                    error.details,
+                    f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
+                ])
+            f.write(error_table.get_string())
+        else:
+            f.write("No errors found.\n")
 
-        for token_type, values in symbol_table.items():
-            symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
-
-        f.write(symbol_table_table.get_string())
-
-    return tokens, None
+    return tokens, errors

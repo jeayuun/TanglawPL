@@ -1,0 +1,30 @@
+--------------- Input ---------------
+volume(cubic.m) = volumeOf.sphere(10);
+value= 133;
+
+----------- Tokens Table ------------
++---------------------+----------+
+| Token Specification |  Tokens  |
++---------------------+----------+
+|      IDENTIFIER     |  volume  |
+|     PARENTHESIS     |    (     |
+|    RESERVED_WORD    |  cubic   |
+|   ACCESSOR_SYMBOL   |    .     |
+|    RESERVED_WORD    |    m     |
+|     PARENTHESIS     |    )     |
+| ASSIGNMENT_OPERATOR |    =     |
+|    RESERVED_WORD    | volumeOf |
+|   ACCESSOR_SYMBOL   |    .     |
+|    RESERVED_WORD    |  sphere  |
+|     PARENTHESIS     |    (     |
+|       INTEGER       |    10    |
+|     PARENTHESIS     |    )     |
+|  TERMINATING_SYMBOL |    ;     |
+|      IDENTIFIER     |  value   |
+| ASSIGNMENT_OPERATOR |    =     |
+|       INTEGER       |   133    |
+|  TERMINATING_SYMBOL |    ;     |
++---------------------+----------+
+
+----------- Errors Table ------------
+No errors found.

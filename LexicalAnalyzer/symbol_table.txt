@@ -1,4 +1,34 @@
 --------------- Input ---------------
-volume(cubic.m) = volumeOf.sphere(10);
+volume(cubicm) = volumeOfsphere(10);
+value= 133;
 
 ----------- Tokens Table ------------
++---------------------+----------------+
+| Token Specification |     Tokens     |
++---------------------+----------------+
+|      IDENTIFIER     |     volume     |
+|     PARENTHESIS     |       (        |
+|      IDENTIFIER     |     cubicm     |
+|     PARENTHESIS     |       )        |
+| ASSIGNMENT_OPERATOR |       =        |
+|      IDENTIFIER     | volumeOfsphere |
+|     PARENTHESIS     |       (        |
+|       INTEGER       |       10       |
+|     PARENTHESIS     |       )        |
+|  TERMINATING_SYMBOL |       ;        |
+|      IDENTIFIER     |     value      |
+| ASSIGNMENT_OPERATOR |       =        |
+|       INTEGER       |      133       |
+|  TERMINATING_SYMBOL |       ;        |
++---------------------+----------------+
+
+----------- Symbol Table ------------
++---------------------+---------------------------------------+
+| Token Specification |                 Tokens                |
++---------------------+---------------------------------------+
+|      IDENTIFIER     | volume, cubicm, volumeOfsphere, value |
+|     PARENTHESIS     |               (, ), (, )              |
+| ASSIGNMENT_OPERATOR |                  =, =                 |
+|       INTEGER       |                10, 133                |
+|  TERMINATING_SYMBOL |                  ;, ;                 |
++---------------------+---------------------------------------+
