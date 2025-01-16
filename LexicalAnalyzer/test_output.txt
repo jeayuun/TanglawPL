@@ -21,60 +21,287 @@ num09
 >=
 
 # arithmetic operators # 
-1 + 1
-1 - 1
+(x + y) * -z
 *
 /
 %
 **
 
-(x + y) * -z
+# boolean operators # 
+!
+&&
+||
+==
+!=
+
+# bitwise operators #
+&
+`
+^
+~
+<<
+>>
+
+# keywords # 
+break
+case
+catch
+class
+const
+continue
+def
+default
+do
+each
+else
+extends
+finally
+for
+if
+implements
+import
+input
+main
+new
+package
+print
+private
+protected
+public
+repeat
+return
+static
+switch
+this
+throw
+throws
+try
+while
+
+# reserved words # 
+areaOf
+circle
+circumference
+cm
+cubic
+distance
+fetch
+ft
+height
+in
+kg
+km
+l
+lbs
+length
+m
+mg
+mm
+perimeterOf
+radius
+rectangle
+setprecision
+side
+sphere
+sq
+square
+triangle
+volumeOf
+width
+
+# noise word #
+ant
+ine
+
+# constant values #
+0 
+3.14 
+2.718281828459045 
+"infinity" 
+'i' 
+true 
+
+# comments #
+# this is a single line comment #
+## this is multi-line 
+comment ##
+
+# delimiters and bracket #
+;
+,
+: 
+#"#
+#"#
+#'#
+#'#
+{
+}
+[
+]
+(
+)
+
+# invalids #
+_Name
+143c
+'Aa'
+_volumeOfcircle
+
+
 
 
 
 ----------- Tokens Table ------------
-+---------------------+----------------------+
-| Token Specification |        Tokens        |
-+---------------------+----------------------+
-|       COMMENT       |     identifiers      |
-|      IDENTIFIER     |  ThisIsAnIdentifer   |
-|      IDENTIFIER     |        My_Num        |
-|      IDENTIFIER     |         Num          |
-|      IDENTIFIER     |        num09         |
-|       COMMENT       | assignment operators |
-| ASSIGNMENT_OPERATOR |          =           |
-| ASSIGNMENT_OPERATOR |          +=          |
-| ASSIGNMENT_OPERATOR |          -=          |
-| ASSIGNMENT_OPERATOR |          *=          |
-| ASSIGNMENT_OPERATOR |          /=          |
-| ASSIGNMENT_OPERATOR |          %=          |
-| ASSIGNMENT_OPERATOR |          ~=          |
-| ASSIGNMENT_OPERATOR |         **=          |
-| ASSIGNMENT_OPERATOR |          &=          |
-| ASSIGNMENT_OPERATOR |          `=          |
-| ASSIGNMENT_OPERATOR |          ^=          |
-| ASSIGNMENT_OPERATOR |         <<=          |
-| RELATIONAL_OPERATOR |          >=          |
-|       COMMENT       | arithmetic operators |
-|       INTEGER       |          1           |
-| ARITHMETIC_OPERATOR |          +           |
-|       INTEGER       |          1           |
-|       INTEGER       |          1           |
-| ARITHMETIC_OPERATOR |          -           |
-|       INTEGER       |          1           |
-| ARITHMETIC_OPERATOR |          *           |
-| ARITHMETIC_OPERATOR |          /           |
-| ARITHMETIC_OPERATOR |          %           |
-| ARITHMETIC_OPERATOR |          **          |
-|     PARENTHESIS     |          (           |
-|      IDENTIFIER     |          x           |
-| ARITHMETIC_OPERATOR |          +           |
-|      IDENTIFIER     |          y           |
-|     PARENTHESIS     |          )           |
-| ARITHMETIC_OPERATOR |          *           |
-|    UNARY_OPERATOR   |          -           |
-|      IDENTIFIER     |          z           |
-+---------------------+----------------------+
++---------------------+-------------------------------+
+| Token Specification |             Tokens            |
++---------------------+-------------------------------+
+|       COMMENT       |          identifiers          |
+|      IDENTIFIER     |       ThisIsAnIdentifer       |
+|      IDENTIFIER     |             My_Num            |
+|      IDENTIFIER     |              Num              |
+|      IDENTIFIER     |             num09             |
+|       COMMENT       |      assignment operators     |
+| ASSIGNMENT_OPERATOR |               =               |
+| ASSIGNMENT_OPERATOR |               +=              |
+| ASSIGNMENT_OPERATOR |               -=              |
+| ASSIGNMENT_OPERATOR |               *=              |
+| ASSIGNMENT_OPERATOR |               /=              |
+| ASSIGNMENT_OPERATOR |               %=              |
+| ASSIGNMENT_OPERATOR |               ~=              |
+| ASSIGNMENT_OPERATOR |              **=              |
+| ASSIGNMENT_OPERATOR |               &=              |
+| ASSIGNMENT_OPERATOR |               `=              |
+| ASSIGNMENT_OPERATOR |               ^=              |
+| ASSIGNMENT_OPERATOR |              <<=              |
+| RELATIONAL_OPERATOR |               >=              |
+|       COMMENT       |      arithmetic operators     |
+|     PARENTHESIS     |               (               |
+|      IDENTIFIER     |               x               |
+| ARITHMETIC_OPERATOR |               +               |
+|      IDENTIFIER     |               y               |
+|     PARENTHESIS     |               )               |
+| ARITHMETIC_OPERATOR |               *               |
+|    UNARY_OPERATOR   |               -               |
+|      IDENTIFIER     |               z               |
+| ARITHMETIC_OPERATOR |               *               |
+| ARITHMETIC_OPERATOR |               /               |
+| ARITHMETIC_OPERATOR |               %               |
+| ARITHMETIC_OPERATOR |               **              |
+|       COMMENT       |       boolean operators       |
+|   LOGICAL_OPERATOR  |               !               |
+|   LOGICAL_OPERATOR  |               &&              |
+|   LOGICAL_OPERATOR  |               ||              |
+| RELATIONAL_OPERATOR |               ==              |
+| RELATIONAL_OPERATOR |               !=              |
+|       COMMENT       |       bitwise operators       |
+|   BITWISE_OPERATOR  |               &               |
+|   BITWISE_OPERATOR  |               `               |
+|   BITWISE_OPERATOR  |               ^               |
+|   BITWISE_OPERATOR  |               ~               |
+|   BITWISE_OPERATOR  |               <<              |
+|   BITWISE_OPERATOR  |               >>              |
+|       COMMENT       |            keywords           |
+|       KEYWORD       |             break             |
+|       KEYWORD       |              case             |
+|       KEYWORD       |             catch             |
+|       KEYWORD       |             class             |
+|       KEYWORD       |             const             |
+|       KEYWORD       |            continue           |
+|       KEYWORD       |              def              |
+|       KEYWORD       |            default            |
+|       KEYWORD       |               do              |
+|       KEYWORD       |              each             |
+|       KEYWORD       |              else             |
+|       KEYWORD       |            extends            |
+|       KEYWORD       |            finally            |
+|       KEYWORD       |              for              |
+|       KEYWORD       |               if              |
+|       KEYWORD       |           implements          |
+|       KEYWORD       |             import            |
+|       KEYWORD       |             input             |
+|       KEYWORD       |              main             |
+|       KEYWORD       |              new              |
+|       KEYWORD       |            package            |
+|       KEYWORD       |             print             |
+|       KEYWORD       |            private            |
+|       KEYWORD       |           protected           |
+|       KEYWORD       |             public            |
+|       KEYWORD       |             repeat            |
+|       KEYWORD       |             return            |
+|       KEYWORD       |             static            |
+|       KEYWORD       |             switch            |
+|       KEYWORD       |              this             |
+|       KEYWORD       |             throw             |
+|       KEYWORD       |             throws            |
+|       KEYWORD       |              try              |
+|       KEYWORD       |             while             |
+|       COMMENT       |         reserved words        |
+|    RESERVED_WORD    |             areaOf            |
+|    RESERVED_WORD    |             circle            |
+|    RESERVED_WORD    |         circumference         |
+|    RESERVED_WORD    |               cm              |
+|    RESERVED_WORD    |             cubic             |
+|    RESERVED_WORD    |            distance           |
+|    RESERVED_WORD    |             fetch             |
+|    RESERVED_WORD    |               ft              |
+|    RESERVED_WORD    |             height            |
+|    RESERVED_WORD    |               in              |
+|    RESERVED_WORD    |               kg              |
+|    RESERVED_WORD    |               km              |
+|    RESERVED_WORD    |               l               |
+|    RESERVED_WORD    |              lbs              |
+|    RESERVED_WORD    |             length            |
+|    RESERVED_WORD    |               m               |
+|    RESERVED_WORD    |               mg              |
+|    RESERVED_WORD    |               mm              |
+|    RESERVED_WORD    |          perimeterOf          |
+|    RESERVED_WORD    |             radius            |
+|    RESERVED_WORD    |           rectangle           |
+|    RESERVED_WORD    |          setprecision         |
+|    RESERVED_WORD    |              side             |
+|    RESERVED_WORD    |             sphere            |
+|    RESERVED_WORD    |               sq              |
+|    RESERVED_WORD    |             square            |
+|    RESERVED_WORD    |            triangle           |
+|    RESERVED_WORD    |            volumeOf           |
+|    RESERVED_WORD    |             width             |
+|       COMMENT       |           noise word          |
+|      NOISE_WORD     |              ant              |
+|      NOISE_WORD     |              ine              |
+|       COMMENT       |        constant values        |
+|       INTEGER       |               0               |
+|     REAL_NUMBER     |              3.14             |
+|     REAL_NUMBER     |       2.718281828459045       |
+|    STRING_LITERAL   |            infinity           |
+|  CHARACTER_LITERAL  |               i               |
+|       BOOLEAN       |              true             |
+|       COMMENT       |            comments           |
+|       COMMENT       | this is a single line comment |
+|       COMMENT       |      this is multi-line       |
+|                     |            comment            |
+|       COMMENT       |     delimiters and bracket    |
+|  TERMINATING_SYMBOL |               ;               |
+|  SEPARATING_SYMBOL  |               ,               |
+|    SPECIAL_SYMBOL   |               :               |
+|       COMMENT       |               "               |
+|       COMMENT       |               "               |
+|       COMMENT       |               '               |
+|       COMMENT       |               '               |
+|     PARENTHESIS     |               {               |
+|     PARENTHESIS     |               }               |
+|     PARENTHESIS     |               [               |
+|     PARENTHESIS     |               ]               |
+|     PARENTHESIS     |               (               |
+|     PARENTHESIS     |               )               |
+|       COMMENT       |            invalids           |
++---------------------+-------------------------------+
 
 ----------- Errors Table ------------
-No errors found.
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
+|     Error Type    |                                                   Details                                                    |      Location      |
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
+| Illegal Character |             'Invalid identifier '_Name' (Identifiers must begin with a letter).' is not allowed.             | Line 144, Column 1 |
+|   Invalid Number  |                     Invalid number '143c'. Numbers cannot contain alphabetic characters.                     | Line 145, Column 1 |
+| Illegal Character | 'Character literal 'Aa' is invalid. A character literal must contain exactly one character.' is not allowed. | Line 146, Column 1 |
+| Illegal Character |        'Invalid identifier '_volumeOfcircle' (Identifiers must begin with a letter).' is not allowed.        | Line 147, Column 1 |
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
