@@ -13,7 +13,7 @@ KEYWORDS = [
     'if', 'else', 'return', 'main', 'case', 'try', 'catch', 'do', 'while',
     'for', 'each', 'import', 'implements', 'switch', 'throw', 'throws',
     'this', 'public', 'protected', 'private', 'new', 'package', 'break',
-    'repeat', 'def', 'print', 'input', 'continue', 'default', 'const',
+    'repeat', 'def', 'print', 'println', 'input', 'continue', 'default', 'const',
     'extends', 'finally', 'static'
 ]
 RESERVED_WORDS = [
@@ -49,22 +49,24 @@ class Error:
         self.details = details
 
     def as_string(self):
-        result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col}'
+        result = f'{self.error_name}: {self.details}\n'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col + 1}'
         return result
 
+
 class IllegalCharError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Illegal Character', details)
+    def __init__(self, pos_start, pos_end, illegal_char):
+        super().__init__(pos_start, pos_end, 'Illegal Character', f"'{illegal_char}' is not allowed.")
+
 
 class UnclosedStringError(Error):
     def __init__(self, pos_start, pos_end):
         super().__init__(pos_start, pos_end, 'Unclosed String Literal', 'String literal was not closed.')
 
+
 class InvalidNumberError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
-        self.type = 'ERROR' 
 
 #######################################
 #              POSITION               #
@@ -123,38 +125,50 @@ class Lexer:
 
     def make_tokens(self):
         tokens = []
+        errors = []
 
         while self.current_char is not None:
             if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
                 self.advance()
-                if self.current_char == '\\' and self.peek() in 'tnv':  
-                    self.advance() 
-                    self.advance()  
 
             elif self.current_char == '#':
                 comment_token = self.make_comment()
-                if isinstance(comment_token, Error):  
-                    return [], comment_token
+                if isinstance(comment_token, Error):
+                    errors.append(comment_token)  # Collect errors
+                else:
+                    tokens.append(comment_token)
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 try:
                     tokens.append(self.make_number())
                 except InvalidNumberError as e:
-                    return [], e 
+                    errors.append(e) 
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
-                tokens.append(self.make_identifier_or_keyword())
+                token = self.make_identifier_or_keyword()
+                if isinstance(token, Error):
+                    errors.append(token)  # Collect errors
+                else:
+                    tokens.append(token)
 
             elif self.current_char == '"':
-                tokens.append(self.make_string())
+                token = self.make_string()
+                if isinstance(token, Error):
+                    errors.append(token)  # Collect errors
+                else:
+                    tokens.append(token)
 
             elif self.current_char == "'":
-                tokens.append(self.make_character())
+                token = self.make_character()
+                if isinstance(token, Error):
+                    errors.append(token)  # Collect errors
+                else:
+                    tokens.append(token)
 
             elif self.current_char in SYMBOLS:
                 token_or_error = self.make_symbol()
-                if isinstance(token_or_error, IllegalCharError):
-                    print(f"Error: {token_or_error.as_string()}")  # Log errors and skip
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)  # Collect errors
                 else:
                     tokens.append(token_or_error)
 
@@ -162,9 +176,9 @@ class Lexer:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
+                errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, None
+        return tokens, errors
 
     def peek(self):
         peek_pos = self.pos.idx + 1
@@ -187,7 +201,7 @@ class Lexer:
         while self.current_char is not None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
                 if has_decimal:
-                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str + self.current_char}'")
+                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Multiple decimal points detected.")
                 has_decimal = True
             num_str += self.current_char
             self.advance()
@@ -397,19 +411,23 @@ def run(fn, text):
         return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
 
     lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
+    tokens, errors = lexer.make_tokens()
 
-    if error:
-        return [], error.as_string()
+    for error in errors:
+        print(error.as_string())  # Print detailed error information
 
-    symbol_table = {}
+    # if error:
+    #     return [], error.as_string()
 
-    for token in tokens:
-        if isinstance(token, Error):  # Skip errors
-            continue
-        if token.type not in symbol_table:
-            symbol_table[token.type] = []
-        symbol_table[token.type].append(token.value)
+    # symbol_table = {}
+    
+
+    # for token in tokens:
+    #     if isinstance(token, Error):  # Skip errors
+    #         continue
+    #     if token.type not in symbol_table:
+    #         symbol_table[token.type] = []
+    #     symbol_table[token.type].append(token.value)
 
     with open("symbol_table.txt", "w") as f:
         f.write("--------------- Input ---------------\n")
@@ -420,18 +438,39 @@ def run(fn, text):
         token_table.field_names = ["Token Specification", "Tokens"]
 
         for token in tokens:
+            if isinstance(token, Error):  # Skip errors
+                continue
             token_table.add_row([token.type, token.value])
+
         
         f.write(token_table.get_string())
         f.write("\n\n")
 
-        f.write("----------- Symbol Table ------------\n")
-        symbol_table_table = PrettyTable()
-        symbol_table_table.field_names = ["Token Specification", "Tokens"]
+        f.write("----------- Errors Table ------------\n")
+        if errors:
+            error_table = PrettyTable()
+            error_table.field_names = ["Error Type", "Details", "Location"]
+            for error in errors:
+                error_table.add_row(
+                    [
+                        error.error_name,
+                        error.details,
+                        f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}",
+                    ]
+                )
+            f.write(error_table.get_string())
+        else:
+            f.write("No errors found.\n")
 
-        for token_type, values in symbol_table.items():
-            symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
+        # f.write("----------- Symbol Table ------------\n")
+        # symbol_table_table = PrettyTable()
+        # symbol_table_table.field_names = ["Token Specification", "Tokens"]
 
-        f.write(symbol_table_table.get_string())
+        # for token_type, values in symbol_table.items():
+        #     symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
 
-    return tokens, None
+        # f.write(symbol_table_table.get_string())
+
+        
+
+    return tokens, errors

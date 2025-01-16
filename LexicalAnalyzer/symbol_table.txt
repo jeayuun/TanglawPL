@@ -1,33 +1,59 @@
 --------------- Input ---------------
-fetch = 100
-areaOf = 50
-circle = 3.14 * radius
+
+int x = 10 - -2;    #example comment#
+int y = 2.2;
+if (x > y) {
+    print("x is greater");
+} else {
+    print("y is greater");
+}
+boolean flag = true;
 
 
 ----------- Tokens Table ------------
-+---------------------+--------+
-| Token Specification | Tokens |
-+---------------------+--------+
-|    RESERVED_WORDS   | fetch  |
-| ASSIGNMENT_OPERATOR |   =    |
-|       INTEGER       |  100   |
-|    RESERVED_WORDS   | areaOf |
-| ASSIGNMENT_OPERATOR |   =    |
-|       INTEGER       |   50   |
-|    RESERVED_WORDS   | circle |
-| ASSIGNMENT_OPERATOR |   =    |
-|     REAL_NUMBER     |  3.14  |
-| ARITHMETIC_OPERATOR |   *    |
-|    RESERVED_WORDS   | radius |
-+---------------------+--------+
++---------------------+-----------------+
+| Token Specification |      Tokens     |
++---------------------+-----------------+
+|      DATA_TYPE      |       int       |
+|      IDENTIFIER     |        x        |
+| ASSIGNMENT_OPERATOR |        =        |
+|       INTEGER       |        10       |
+| ARITHMETIC_OPERATOR |        -        |
+|       INTEGER       |        -2       |
+|  TERMINATING_SYMBOL |        ;        |
+|       COMMENT       | example comment |
+|      DATA_TYPE      |       int       |
+|      IDENTIFIER     |        y        |
+| ASSIGNMENT_OPERATOR |        =        |
+|     REAL_NUMBER     |       2.2       |
+|  TERMINATING_SYMBOL |        ;        |
+|       KEYWORD       |        if       |
+|     PARENTHESIS     |        (        |
+|      IDENTIFIER     |        x        |
+| RELATIONAL_OPERATOR |        >        |
+|      IDENTIFIER     |        y        |
+|     PARENTHESIS     |        )        |
+|     PARENTHESIS     |        {        |
+|       KEYWORD       |      print      |
+|     PARENTHESIS     |        (        |
+|    STRING_LITERAL   |   x is greater  |
+|     PARENTHESIS     |        )        |
+|  TERMINATING_SYMBOL |        ;        |
+|     PARENTHESIS     |        }        |
+|       KEYWORD       |       else      |
+|     PARENTHESIS     |        {        |
+|       KEYWORD       |      print      |
+|     PARENTHESIS     |        (        |
+|    STRING_LITERAL   |   y is greater  |
+|     PARENTHESIS     |        )        |
+|  TERMINATING_SYMBOL |        ;        |
+|     PARENTHESIS     |        }        |
+|      DATA_TYPE      |     boolean     |
+|      IDENTIFIER     |       flag      |
+| ASSIGNMENT_OPERATOR |        =        |
+|       BOOLEAN       |       true      |
+|  TERMINATING_SYMBOL |        ;        |
++---------------------+-----------------+
 
------------ Symbol Table ------------
-+---------------------+-------------------------------+
-| Token Specification |             Tokens            |
-+---------------------+-------------------------------+
-|    RESERVED_WORDS   | fetch, areaOf, circle, radius |
-| ASSIGNMENT_OPERATOR |            =, =, =            |
-|       INTEGER       |            100, 50            |
-|     REAL_NUMBER     |              3.14             |
-| ARITHMETIC_OPERATOR |               *               |
-+---------------------+-------------------------------+
+----------- Errors Table ------------
+No errors found.
