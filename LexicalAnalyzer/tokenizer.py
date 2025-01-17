@@ -482,6 +482,10 @@ class Lexer:
             symbol_str += self.current_char
             self.advance()
 
+        if (symbol_str in ['++', '--'] and 
+            (self.current_char == '+' or self.current_char == '-')):
+            return IllegalCharError(pos_start, self.pos, f"Unexpected trailing '{self.current_char}' after unary operator '{symbol_str}'.")
+
         if symbol_str in ASSIGNMENT_OPERATORS:
             token = Token('ASSIGNMENT_OPERATOR', symbol_str)
         elif symbol_str in ['+', '-']:
@@ -587,12 +591,12 @@ def run(fn, text):
 
         f.write("----------- Tokens Table ------------\n")
         token_table = PrettyTable()
-        token_table.field_names = ["Token Specification", "Tokens"]
+        token_table.field_names = ["Lexeme", "Token Specification"]
 
         for token in tokens:
             if isinstance(token, Error): 
                 continue
-            token_table.add_row([token.type, token.value])
+            token_table.add_row([token.value, token.type])
 
         f.write(token_table.get_string())
         f.write("\n\n")

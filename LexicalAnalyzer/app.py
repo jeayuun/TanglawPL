@@ -28,14 +28,14 @@ def process_file(filename):
 
             output_file.write("----------- Tokens Table ------------\n")
             token_table = PrettyTable()
-            token_table.field_names = ["Token Specification", "Tokens"]
+            token_table.field_names = ["Lexeme", "Token Specification"]
 
             for token in tokens:
                 if isinstance(token, list): 
                     for sub_token in token:
-                        token_table.add_row([sub_token.type, sub_token.value])
+                        token_table.add_row([sub_token.value, sub_token.type])
                 else:
-                    token_table.add_row([token.type, token.value])
+                    token_table.add_row([token.value, token.type])
 
             output_file.write(token_table.get_string() + "\n\n")
 
