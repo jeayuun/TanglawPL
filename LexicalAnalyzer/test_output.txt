@@ -25,10 +25,10 @@ num09
 /
 %
 **
-+
--
+++
+--
 # sample arithmetic application for + & -#
-(x + y) * -z
+(x - y) * -z
 
 # boolean operators # 
 !
@@ -187,12 +187,12 @@ _volumeOfcircle
 | ARITHMETIC_OPERATOR |                    /                    |
 | ARITHMETIC_OPERATOR |                    %                    |
 | ARITHMETIC_OPERATOR |                    **                   |
-|    UNARY_OPERATOR   |                    +                    |
-|    UNARY_OPERATOR   |                    -                    |
+|    UNARY_OPERATOR   |                    ++                   |
+|    UNARY_OPERATOR   |                    --                   |
 |       COMMENT       | sample arithmetic application for + & - |
 |     PARENTHESIS     |                    (                    |
 |      IDENTIFIER     |                    x                    |
-| ARITHMETIC_OPERATOR |                    +                    |
+| ARITHMETIC_OPERATOR |                    -                    |
 |      IDENTIFIER     |                    y                    |
 |     PARENTHESIS     |                    )                    |
 | ARITHMETIC_OPERATOR |                    *                    |
@@ -283,14 +283,18 @@ _volumeOfcircle
 |    RESERVED_WORD    |                 volumeOf                |
 |    RESERVED_WORD    |                  width                  |
 |       COMMENT       |                noise word               |
+|      NOISE_WORD     |                   ant                   |
 |       KEYWORD       |                  const                  |
+|      NOISE_WORD     |                   ine                   |
 |       KEYWORD       |                   def                   |
+|      NOISE_WORD     |                   eger                  |
 |      DATA_TYPE      |                   int                   |
+|      NOISE_WORD     |                  acter                  |
 |      DATA_TYPE      |                   char                  |
 |       COMMENT       |             constant values             |
 |       INTEGER       |                    0                    |
 |        FLOAT        |                   3.14                  |
-|        FLOAT        |            2.718281828459045            |
+|        DOUBLE       |            2.718281828459045            |
 |    STRING_LITERAL   |                 infinity                |
 |  CHARACTER_LITERAL  |                    i                    |
 |       BOOLEAN       |                   true                  |

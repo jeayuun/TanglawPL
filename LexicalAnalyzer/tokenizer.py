@@ -232,6 +232,7 @@ class Lexer:
     def make_number(self):
         num_str = ''
         has_decimal = False
+        decimal_count = 0
         pos_start = self.pos.copy()
 
         if self.current_char == '-' or self.current_char == '+':  
@@ -243,6 +244,9 @@ class Lexer:
                 if has_decimal:
                     return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Multiple decimal points detected.")
                 has_decimal = True
+            else:
+                if has_decimal:
+                    decimal_count += 1
             num_str += self.current_char
             self.advance()
 
@@ -255,10 +259,10 @@ class Lexer:
         try:
             if has_decimal:
                 real_number = float(num_str)
-                if abs(real_number) <= 3.4e38:  
-                    token = Token('FLOAT', real_number)
-                else:
+                if decimal_count > 7:  #
                     token = Token('DOUBLE', real_number)
+                else:  
+                    token = Token('FLOAT', real_number)
             else:
                 integer_number = int(num_str)
                 if -32768 <= integer_number <= 32767: 
@@ -271,7 +275,6 @@ class Lexer:
         except ValueError:
             return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
 
-
     def make_identifier_or_keyword(self):
         id_str = ''
         pos_start = self.pos.copy()
@@ -283,7 +286,9 @@ class Lexer:
             pos_end = self.pos.copy()
             return IllegalCharError(pos_start, pos_end, 
                                     f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
-   
+
+        tokens = [] 
+
         while self.current_char is not None and (
             self.current_char in ALPHABETS + DIGITS + '_' or self.current_char == '.'):
             if self.current_char == '.':
@@ -293,24 +298,29 @@ class Lexer:
                     token = Token('IDENTIFIER', id_str)
                 self.prev_token_type = token.type
                 self.advance()
-                return [token, Token('ACCESSOR_SYMBOL', '.')]  
+                tokens.append(token)
+                tokens.append(Token('ACCESSOR_SYMBOL', '.'))
+                return tokens
             id_str += self.current_char
             self.advance()
 
-        normalized = NOISE_WORD_RULES.get(id_str, id_str)
+        for noise_word in NOISE_WORDS:
+            if noise_word in id_str:
+                tokens.append(Token('NOISE_WORD', noise_word))
 
+        normalized = NOISE_WORD_RULES.get(id_str, id_str)
         if normalized in DATA_TYPES:
-            return Token('DATA_TYPE', normalized)
+            tokens.append(Token('DATA_TYPE', normalized))
         elif normalized in BOOLEAN_VALUES:
-            return Token('BOOLEAN', normalized)
+            tokens.append(Token('BOOLEAN', normalized))
         elif normalized in KEYWORDS:
-            return Token('KEYWORD', normalized)
+            tokens.append(Token('KEYWORD', normalized))
         elif normalized in RESERVED_WORDS:
-            return Token('RESERVED_WORD', normalized)
-        elif normalized in NOISE_WORDS:
-            return Token('NOISE_WORD', normalized)
+            tokens.append(Token('RESERVED_WORD', normalized))
         else:
-            return Token('IDENTIFIER', normalized)
+            tokens.append(Token('IDENTIFIER', id_str))
+
+        return tokens
     
     def make_tokens(self):
         tokens = []
@@ -481,6 +491,10 @@ class Lexer:
                 token = Token('UNARY_OPERATOR', symbol_str)
             else:
                 token = Token('ARITHMETIC_OPERATOR', symbol_str)  
+        elif symbol_str == '++':
+            token = Token('UNARY_OPERATOR', '++')
+        elif symbol_str == '--':
+            token = Token('UNARY_OPERATOR', '--')
         elif symbol_str in ARITHMETIC_OPERATORS:
             token = Token('ARITHMETIC_OPERATOR', symbol_str)
         elif symbol_str in RELATIONAL_OPERATORS:

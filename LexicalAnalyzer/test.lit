@@ -24,10 +24,10 @@ num09
 /
 %
 **
-+
--
+++
+--
 # sample arithmetic application for + & -#
-(x + y) * -z
+(x - y) * -z
 
 # boolean operators # 
 !

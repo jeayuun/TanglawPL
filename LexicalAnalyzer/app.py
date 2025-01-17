@@ -31,7 +31,11 @@ def process_file(filename):
             token_table.field_names = ["Token Specification", "Tokens"]
 
             for token in tokens:
-                token_table.add_row([token.type, token.value])
+                if isinstance(token, list): 
+                    for sub_token in token:
+                        token_table.add_row([sub_token.type, sub_token.value])
+                else:
+                    token_table.add_row([token.type, token.value])
 
             output_file.write(token_table.get_string() + "\n\n")
 
