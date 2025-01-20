@@ -1,30 +1,67 @@
 --------------- Input ---------------
-volume(cubic.m) = volumeOf.sphere(10);
-value= 133;
+for (i=0; i<5; i++)
+   if (i>5) then
+     ++count
+    {}
+    define
+     2 + 3
+     3 + 3 - 2 + 3;
+9999+ 9
+  "aaaa"
+
+     -x
+
+     end
 
 ----------- Tokens Table ------------
-+---------------------+----------+
-| Token Specification |  Tokens  |
-+---------------------+----------+
-|      IDENTIFIER     |  volume  |
-|     PARENTHESIS     |    (     |
-|    RESERVED_WORD    |  cubic   |
-|   ACCESSOR_SYMBOL   |    .     |
-|    RESERVED_WORD    |    m     |
-|     PARENTHESIS     |    )     |
-| ASSIGNMENT_OPERATOR |    =     |
-|    RESERVED_WORD    | volumeOf |
-|   ACCESSOR_SYMBOL   |    .     |
-|    RESERVED_WORD    |  sphere  |
-|     PARENTHESIS     |    (     |
-|       INTEGER       |    10    |
-|     PARENTHESIS     |    )     |
-|  TERMINATING_SYMBOL |    ;     |
-|      IDENTIFIER     |  value   |
-| ASSIGNMENT_OPERATOR |    =     |
-|       INTEGER       |   133    |
-|  TERMINATING_SYMBOL |    ;     |
-+---------------------+----------+
++--------+---------------------+
+| Lexeme | Token Specification |
++--------+---------------------+
+|  for   |       KEYWORD       |
+|   (    |    L_PARENTHESIS    |
+|   i    |      IDENTIFIER     |
+|   =    |      ASSIGN_OP      |
+|   0    |       INTEGER       |
+|   ;    |      SEMICOLON      |
+|   i    |      IDENTIFIER     |
+|   <    |      LESS_THAN      |
+|   5    |       INTEGER       |
+|   ;    |      SEMICOLON      |
+|   i    |      IDENTIFIER     |
+|   ++   |  INCREMENT_UNARY_OP |
+|   )    |    R_PARENTHESIS    |
+|   if   |       KEYWORD       |
+|   (    |    L_PARENTHESIS    |
+|   i    |      IDENTIFIER     |
+|   >    |     GREATER_THAN    |
+|   5    |       INTEGER       |
+|   )    |    R_PARENTHESIS    |
+|  then  |      IDENTIFIER     |
+|   ++   |  INCREMENT_UNARY_OP |
+| count  |      IDENTIFIER     |
+|   {    |       L_CURLY       |
+|   }    |       R_CURLY       |
+|  ine   |      NOISE_WORD     |
+|  def   |       KEYWORD       |
+|   2    |       INTEGER       |
+|   +    |     ADD_OPERATOR    |
+|   3    |       INTEGER       |
+|   3    |       INTEGER       |
+|   +    |     ADD_OPERATOR    |
+|   3    |       INTEGER       |
+|   -    |  SUBTRACT_OPERATOR  |
+|   2    |       INTEGER       |
+|   +    |     ADD_OPERATOR    |
+|   3    |       INTEGER       |
+|   ;    |      SEMICOLON      |
+|  9999  |       INTEGER       |
+|   +    |     ADD_OPERATOR    |
+|   9    |       INTEGER       |
+|  aaaa  |    STRING_LITERAL   |
+|   -    |  SUBTRACT_OPERATOR  |
+|   x    |      IDENTIFIER     |
+|  end   |      IDENTIFIER     |
++--------+---------------------+
 
 ----------- Errors Table ------------
 No errors found.
