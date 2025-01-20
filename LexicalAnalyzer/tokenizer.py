@@ -487,34 +487,149 @@ class Lexer:
             return IllegalCharError(pos_start, self.pos, f"Unexpected trailing '{self.current_char}' after unary operator '{symbol_str}'.")
 
         if symbol_str in ASSIGNMENT_OPERATORS:
-            token = Token('ASSIGNMENT_OPERATOR', symbol_str)
+            if symbol_str == '=':
+                token = Token('ASSIGN_OP', symbol_str) 
+            elif symbol_str == '+=':
+                token = Token('ADD_ASSIGN_OP', symbol_str)
+            elif symbol_str == '-=':
+                token = Token('SUBT_ASSIGN_OP', symbol_str)
+            elif symbol_str == '*=':
+                token = Token('MULTIPLY_ASSIGN_OP', symbol_str)
+            elif symbol_str == '/=':
+                token = Token('DIV_ASSIGN_OP', symbol_str)
+            elif symbol_str == '%=':
+                token = Token('MOD_ASSIGN_OP', symbol_str)
+            elif symbol_str in '^=': 
+                token = Token('XOR_ASSIGN_OP', symbol_str) 
+            elif symbol_str in '~=': 
+                token = Token('INT_DIV_ASSIGN_OP', symbol_str)
+            elif symbol_str == '**=':
+                token = Token('EXPONENTIAL_ASSIGN_OP', symbol_str)
+            elif symbol_str == '&=':
+                token = Token('BITWISE_AND_ASSIGN_OP', symbol_str)
+            elif symbol_str == '`=': 
+                token = Token('BITWISE_OR_ASSIGN_OP', symbol_str) 
+            elif symbol_str == '<<=':
+                token = Token('L_SHIFT_ASSIGN_OP', symbol_str)
+            elif symbol_str == '>>=':
+                token = Token('R_SHIFT_ASSIGN_OP', symbol_str)
+
         elif symbol_str in ['+', '-']:
             if self.prev_token_type in ['IDENTIFIER', 'INTEGER', 'REAL_NUMBER', 'CLOSING_PARENTHESIS']:
-                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+                if symbol_str == '+':
+                    token = Token('ADD_OPERATOR', symbol_str)
+                elif symbol_str == '-':
+                    token = Token('SUBTRACT_OPERATOR', symbol_str)
             elif self.prev_token_type in ['ARITHMETIC_OPERATOR', 'UNARY_OPERATOR', None]:
                 token = Token('UNARY_OPERATOR', symbol_str)
             else:
                 token = Token('ARITHMETIC_OPERATOR', symbol_str)  
+
         elif symbol_str == '++':
-            token = Token('UNARY_OPERATOR', '++')
+            token = Token('INCREMENT_UNARY_OP', '++')
         elif symbol_str == '--':
-            token = Token('UNARY_OPERATOR', '--')
+            token = Token('DECREMENT_UNARY_OP', '--')
+
         elif symbol_str in ARITHMETIC_OPERATORS:
-            token = Token('ARITHMETIC_OPERATOR', symbol_str)
+            if symbol_str == '*':
+                token = Token('MULTIPLY_OP', symbol_str)
+            elif symbol_str == '/':
+                token = Token('DIVIDE_OP', symbol_str)
+            elif symbol_str == '%':
+                token = Token('MODULO_OP', symbol_str)
+            elif symbol_str == '**':
+                token = Token('EXPONENTIATION_OP', symbol_str) 
+            else:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+
         elif symbol_str in RELATIONAL_OPERATORS:
-            token = Token('RELATIONAL_OPERATOR', symbol_str)
+            if symbol_str == '<':
+                token = Token('LESS_THAN', symbol_str) 
+            elif symbol_str == '>':
+                token = Token('GREATER_THAN', symbol_str) 
+            elif symbol_str == '<=':
+                token = Token('LESS_THAN_OR_EQUAL_TO', symbol_str) 
+            elif symbol_str == '>=':
+                token = Token('GREATER_THAN_OR_EQUAL_TO', symbol_str) 
+            elif symbol_str == '==':
+                token = Token('EQUAL_TO', symbol_str) 
+            elif symbol_str == '!=':
+                token = Token('NOT_EQUAL_TO', symbol_str) 
+            else:
+                token = Token('RELATIONAL_OPERATOR', symbol_str) 
+
         elif symbol_str in LOGICAL_OPERATORS:
             token = Token('LOGICAL_OPERATOR', symbol_str)
+            if symbol_str == '!':
+                token = Token('NOT_LOGICAL_OP', symbol_str) 
+            elif symbol_str == '&&':
+                token = Token('AND_LOGICAL_OP', symbol_str)  
+            elif symbol_str == '||':
+                token = Token('OR_LOGICAL_OP', symbol_str)
+
         elif symbol_str in BITWISE_OPERATORS:
-            token = Token('BITWISE_OPERATOR', symbol_str)
+            if symbol_str == '&':
+                token = Token('BITWISE_AND_OP', symbol_str)
+            elif symbol_str == '`': 
+                token = Token('BITWISE_OR_OP', symbol_str)
+            elif symbol_str == '^':
+                token = Token('BITWISE_XOR_OP', symbol_str)
+            elif symbol_str == '<<':
+                token = Token('LEFT_SHIFT_OP', symbol_str)
+            elif symbol_str == '>>':
+                token = Token('RIGHT_SHIFT_OP', symbol_str)
+            elif symbol_str == '~':
+                token = Token('BITWISE_NOT_OP', symbol_str) # to be changed 
+            else:
+                token = Token('BITWISE_OP', symbol_str) 
+
         elif symbol_str in SPECIAL_SYMBOLS:
-            token = Token('SPECIAL_SYMBOL', symbol_str)
+            if symbol_str == '|':
+                token = Token('PIPE_SYMBOL', symbol_str)
+            elif symbol_str == ':':
+                token = Token('COLON_SYMBOL', symbol_str)
+            elif symbol_str == '`':
+                token = Token('BACKTICK_SYMBOL', symbol_str)
+            elif symbol_str == '\\':
+                token = Token('BACKSLASH_SYMBOL', symbol_str)
+            elif symbol_str == '@':
+                token = Token('AT_SYMBOL', symbol_str)
+            elif symbol_str == '#':
+                token = Token('HASH_SYMBOL', symbol_str)
+            elif symbol_str == '$':
+                token = Token('DOLLAR_SYMBOL', symbol_str)
+            elif symbol_str == '~':
+                token = Token('TILDE_SYMBOL', symbol_str)
+            elif symbol_str == '"':
+                token = Token('DOUBLE_QUOTE_SYMBOL', symbol_str)
+            elif symbol_str == "'":
+                token = Token('SINGLE_QUOTE_SYMBOL', symbol_str)
+            else:
+                token = Token('SPECIAL_SYMBOL', symbol_str) 
+
         elif symbol_str in TERMINATING_SYMBOLS:
-            token = Token('TERMINATING_SYMBOL', symbol_str)
+            if symbol_str == ';':
+                token = Token('SEMICOLON', symbol_str)
+            else:
+                token = Token('TERMINATING_SYMBOL', symbol_str) 
         elif symbol_str in SEPARATING_SYMBOLS:
             token = Token('SEPARATING_SYMBOL', symbol_str)
+            
         elif symbol_str in PARENTHESIS:
-            token = Token('PARENTHESIS', symbol_str)
+            if symbol_str == '(':
+                token = Token('L_PARENTHESIS', symbol_str) 
+            elif symbol_str == ')':
+                token = Token('R_PARENTHESIS', symbol_str)
+            elif symbol_str == '{':
+                token = Token('L_CURLY', symbol_str) 
+            elif symbol_str == '}':
+                token = Token('R_CURLY', symbol_str) 
+            elif symbol_str == '[':
+                token = Token('L_BRACKET', symbol_str)
+            elif symbol_str == ']':
+                token = Token('R_BRACKET', symbol_str)
+            else:
+                token = Token('PARENTHESIS', symbol_str) 
         elif symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
             token = Token('ACCESSOR_SYMBOL', symbol_str)
         else:
