@@ -520,7 +520,10 @@
       /* Thumb color and track color */
     }
   </style>
+
+
   <script>
+          /* SCRIPT FOR FILE UPLOAD */
     document
       .getElementById("fileUpload")
       .addEventListener("change", function (event) {
@@ -557,6 +560,49 @@
           });
       });
   </script>
+
+<script>
+  document.getElementById("runLexer").addEventListener("click", function () {
+      const code = document.getElementById("codeEditor").value; // Read the input from the textarea
+      console.log("Captured user input: ", code); // Log the input value
+
+      // Check if there's any input
+      if (code.trim() === "") {
+          alert("Please enter some code.");
+          console.log("No code entered. Prompted user to enter code.");
+      } else {
+          alert("Code captured successfully.");
+          console.log("Code captured successfully.");
+
+          // Send the code to the backend (Flask server)
+          fetch("http://localhost:5000/tokenize", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ code: code }),  // Send the code as JSON
+          })
+          .then((response) => response.json())
+          .then((data) => {
+              if (data.error) {
+                  alert("Error: " + data.error);
+                  console.error("Error:", data.error);
+              } else {
+                  // Show tokens and errors in the output
+                  const output = document.getElementById("output");
+                  output.textContent = "Tokens: " + JSON.stringify(data.tokens, null, 2) +
+                                       "\nErrors: " + JSON.stringify(data.errors, null, 2);
+              }
+          })
+          .catch((error) => {
+              console.error("Error:", error);
+              alert("Failed to process the code. Please try again.");
+          });
+      }
+  });
+</script>
+
+
 </body>
 
 </html>
