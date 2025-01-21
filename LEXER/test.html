@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Animation</title>
+  <style>
+    /* Define Keyframes */
+    @keyframes slideIn {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Style the box */
+    .animated-box {
+      width: 200px;
+      height: 200px;
+      background-color: #3498db;
+      color: white;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+      animation: slideIn 2s ease-in-out; /* Apply the animation */
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-box">Hello!</div>
+</body>
+</html>
