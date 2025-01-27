@@ -1,0 +1,258 @@
+--------------- Input ---------------
+int choice;
+ 
+println("Choose an option:
+   1. Calculate the Area of Square
+   2. Calculate the Area of Rectangle
+   3. Calculate the Area of Triangle
+   4. Exit");
+ 
+if(choice == 1) {
+   println("Enter the side length of the square:");
+   side S(cm) = input();
+  
+   ASqauare(m) = areaOf.square(S);
+  
+   println("The area of the square is {ASqauare} square meters.");
+}
+else if(choice == 2) {
+   println("Enter the length of the rectangle:");
+   length L(cm) = input();
+  
+   println("Enter the width of the rectangle:");
+   width W(cm) = input();
+ 
+   ARectangle(m) = areaOf.Rectangle(L,W);
+  
+   println("The area of the rectangle is {ARectangle} square meters.");
+}
+else if(choice == 3) {
+   println("Enter the base length of the triangle:");
+   base B(cm) = input();
+  
+   println("Enter the height of the triangle:");
+   height H(cm)= input();
+  
+   ATriangle(m) = areaOf.triangle(B,H);
+  
+   println("The area of the triangle is {ATriangle} square meters.");
+}
+ 
+else if(choice == 4) {
+   println("Exiting the program.");
+}
+else {
+   println("Invalid choice. Please select a valid option.");
+}
+
+
+----------- Tokens Table ------------
++-----------------------------------------------+---------------------+
+|                     Lexeme                    | Token Specification |
++-----------------------------------------------+---------------------+
+|                      int                      |      DATA_TYPE      |
+|                     choice                    |      IDENTIFIER     |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|               Choose an option:               |    STRING_LITERAL   |
+|          1. Calculate the Area of Square      |                     |
+|        2. Calculate the Area of Rectangle     |                     |
+|         3. Calculate the Area of Triangle     |                     |
+|                      4. Exit                  |                     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       1                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|      Enter the side length of the square:     |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                      side                     |    RESERVED_WORD    |
+|                       S                       |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       cm                      |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    ASqauare                   |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       m                       |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                     square                    |    RESERVED_WORD    |
+|                       (                       |    L_PARENTHESIS    |
+|                       S                       |      IDENTIFIER     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|           The area of the square is           |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                    ASqauare                   |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       2                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the length of the rectangle:      |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     length                    |    RESERVED_WORD    |
+|                       L                       |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       cm                      |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the width of the rectangle:       |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     width                     |    RESERVED_WORD    |
+|                       W                       |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       cm                      |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                   ARectangle                  |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       m                       |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                   Rectangle                   |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       L                       |      IDENTIFIER     |
+|                       ,                       |  SEPARATING_SYMBOL  |
+|                       W                       |      IDENTIFIER     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|         The area of the rectangle is          |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                   ARectangle                  |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       3                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|     Enter the base length of the triangle:    |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                      base                     |    RESERVED_WORD    |
+|                       B                       |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       cm                      |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the height of the triangle:       |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     height                    |    RESERVED_WORD    |
+|                       H                       |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       cm                      |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                   ATriangle                   |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       m                       |    RESERVED_WORD    |
+|                       )                       |    R_PARENTHESIS    |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                    triangle                   |    RESERVED_WORD    |
+|                       (                       |    L_PARENTHESIS    |
+|                       B                       |      IDENTIFIER     |
+|                       ,                       |  SEPARATING_SYMBOL  |
+|                       H                       |      IDENTIFIER     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|          The area of the triangle is          |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                   ATriangle                   |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       4                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|              Exiting the program.             |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+| Invalid choice. Please select a valid option. |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
++-----------------------------------------------+---------------------+
+
+----------- Errors Table ------------
+No errors found.

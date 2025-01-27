@@ -13,28 +13,48 @@ KEYWORDS = [
     'if', 'else', 'return', 'main', 'case', 'try', 'catch', 'do', 'while',
     'for', 'each', 'import', 'implements', 'switch', 'throw', 'throws',
     'this', 'public', 'protected', 'private', 'new', 'package', 'break',
-    'repeat', 'def', 'print', 'input', 'continue', 'default', 'const',
-    'extends', 'finally', 'static'
+    'repeat', 'def', 'print', 'println', 'input', 'continue', 'default', 'const',
+    'extends', 'finally', 'static', 'class'
 ]
 RESERVED_WORDS = [
     'fetch', 'areaOf', 'circle', 'cubic', 'distance', 'ft', 'in', 'kg', 'km',
     'l', 'lbs', 'm', 'mg', 'mm', 'perimeterOf', 'repeat', 'sphere', 'sq',
     'triangle', 'rectangle', 'square', 'volumeOf', 'radius', 'circumference',
-    'length', 'height', 'width', 'side', 'solve'
+    'length', 'height', 'width', 'side', 'setprecision', 'cm', 'base', 'cube', 
 ]
 ARITHMETIC_OPERATORS = ['+', '-', '*', '/', '%', '**']
 UNARY_OPERATORS = ['+', '-', '++', '--']
 RELATIONAL_OPERATORS = ['<', '>', '<=', '>=', '==', '!=']
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '~=', '**=', '&=', '`=', '^=', '<<=', '>>=']
 LOGICAL_OPERATORS = ['!', '&&', '||']
-BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '!']
-SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~']
+BITWISE_OPERATORS = ['&', '`', '^', '<<', '>>', '~']
+SPECIAL_SYMBOLS = ['|', ':', '`', '\\', '@', '#', '$', '~', '"', "'", '']
+ACCESSOR_SYMBOL = ['.']
 TERMINATING_SYMBOLS = [';']
 SEPARATING_SYMBOLS = [',']
 WHITESPACE = [' ', '\t', '\n', '\v']
 PARENTHESIS = ['(', ')', '[', ']', '{', '}']
 UNDERSCORE = ['_']
-NOISE_WORDS = ['ant', 'ine']
+NOISE_WORDS = ['ant', 'ine', 'eger', 'acter']
+
+NOISE_WORD_RULES = {
+    'constant': 'const',
+    'const': 'const',  
+    'integer': 'int',
+    'int': 'int',    
+    'character': 'char',
+    'char': 'char',      
+    'define': 'def',
+    'def': 'def'      
+}
+CONSTANTS = {
+    '0': 'INTEGER',
+    '3.14': 'FLOAT',
+    '2.718281828459045': 'DOUBLE',
+    '"infinity"': 'STRING_LITERAL',
+    "'i'": 'CHARACTER_LITERAL',
+    'true': 'BOOLEAN'
+}
 
 #######################################
 #               ERRORS                #
@@ -48,22 +68,23 @@ class Error:
         self.details = details
 
     def as_string(self):
-        result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col}'
+        result = f'{self.error_name}: {self.details}\n'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col + 1}'
         return result
 
 class IllegalCharError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Illegal Character', details)
+    def __init__(self, pos_start, pos_end, illegal_char):
+        super().__init__(pos_start, pos_end, 'Illegal Character', f"'{illegal_char}' is not allowed.")
+
 
 class UnclosedStringError(Error):
     def __init__(self, pos_start, pos_end):
         super().__init__(pos_start, pos_end, 'Unclosed String Literal', 'String literal was not closed.')
 
+
 class InvalidNumberError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Number', details)
-        self.type = 'ERROR' 
 
 #######################################
 #              POSITION               #
@@ -95,16 +116,13 @@ class Position:
 #######################################
 
 class Token:
-    def __init__(self, type_, value=None, pos_start=None, pos_end=None):
+    def __init__(self, type_, value=None):
         self.type = type_
         self.value = value
-        self.pos_start = pos_start
-        self.pos_end = pos_end
-
+    
     def __repr__(self):
         if self.value: return f'{self.type}: {self.value}'
         return f'{self.type}'
-
 
 #######################################
 #               LEXER                 #
@@ -125,38 +143,82 @@ class Lexer:
 
     def make_tokens(self):
         tokens = []
+        errors = []
 
         while self.current_char is not None:
-            if self.current_char in WHITESPACE:
+            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
                 self.advance()
-            elif self.current_char == '#':  # Comment
-                self.skip_comment()
-            elif self.current_char in DIGITS:
-                tokens.append(self.make_number())
-            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
-                try:
-                    tokens.append(self.make_number())
-                except InvalidNumberError as e:
-                    return [], e
 
-            elif self.current_char in ALPHABETS or self.current_char == '_':
-                tokens.append(self.make_identifier_or_keyword())
+            elif self.current_char in CONSTANTS.keys():  
+                const_value = self.match_constant()
+                if const_value:
+                    tokens.append(Token(CONSTANTS[const_value], const_value))
+                    continue
 
-            elif self.current_char in SYMBOLS or self.current_char in PARENTHESIS:
-                symbol_or_error = self.make_symbol()
-                if isinstance(symbol_or_error, Error):
-                    print(f"Error: {symbol_or_error.as_string()}")
+            elif self.current_char == '#': 
+                comment_token = self.make_comment()
+                if isinstance(comment_token, Error):
+                    errors.append(comment_token)
                 else:
-                    tokens.append(symbol_or_error)
+                    tokens.append(comment_token)
 
-            else:
+            elif self.current_char in SYMBOLS:  
+                token_or_error = self.make_symbol()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
+                else:
+                    tokens.append(token_or_error)
+
+            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
+                token_or_error = self.make_number()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
+                else:
+                    tokens.append(token_or_error)
+
+            elif self.current_char in ALPHABETS or self.current_char == '_':  
+                token_or_tokens = self.make_identifier_or_keyword()
+                if isinstance(token_or_tokens, list): 
+                    tokens.extend(token_or_tokens)  
+                elif isinstance(token_or_tokens, Error):
+                    errors.append(token_or_tokens)
+                else:
+                    tokens.append(token_or_tokens)
+
+            elif self.current_char == '"':  
+                tokens_or_error = self.make_string()
+                if isinstance(tokens_or_error, Error): 
+                    errors.append(tokens_or_error)
+                else:
+                    tokens.extend(tokens_or_error)  
+
+            elif self.current_char == "'":  
+                token_or_error = self.make_character()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
+                else:
+                    tokens.append(token_or_error)
+
+            else: 
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                print(f"Error: {IllegalCharError(pos_start, self.pos, f'Unknown symbol {char}').as_string()}")
+                errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, None
+        return tokens, errors
 
+    def match_constant(self):
+        """Matches predefined constants."""
+        for const in CONSTANTS.keys():
+            if self.text[self.pos.idx:self.pos.idx + len(const)] == const:
+                self.advance_by(len(const))
+                return const
+        return None
+
+    def advance_by(self, count):
+        """Advances the position by a specific count."""
+        for _ in range(count):
+            self.advance()
 
     def peek(self):
         peek_pos = self.pos.idx + 1
@@ -167,176 +229,409 @@ class Lexer:
             return False
         return True
 
-    def make_tokens(self):
-        tokens = []
+    def make_number(self):
+        num_str = ''
+        has_decimal = False
+        decimal_count = 0
+        pos_start = self.pos.copy()
 
-        while self.current_char is not None:
-            if self.current_char in WHITESPACE:
-                self.advance()
-            elif self.current_char in DIGITS:
-                tokens.append(self.make_number())
-            elif self.current_char == '+':
-                pos_start = self.pos.copy()
-                self.advance()
-                tokens.append(Token('PLUS', '+', pos_start, self.pos.copy()))
-            elif self.current_char == '-':
-                pos_start = self.pos.copy()
-                self.advance()
-                tokens.append(Token('MINUS', '-', pos_start, self.pos.copy()))
-            elif self.current_char == '*':
-                pos_start = self.pos.copy()
-                self.advance()
-                tokens.append(Token('MUL', '*', pos_start, self.pos.copy()))
-            elif self.current_char == '/':
-                pos_start = self.pos.copy()
-                self.advance()
-                tokens.append(Token('DIV', '/', pos_start, self.pos.copy()))
+        if self.current_char == '-' or self.current_char == '+':  
+            num_str += self.current_char
+            self.advance()
+
+        while self.current_char is not None and self.current_char in DIGITS + '.':
+            if self.current_char == '.':
+                if has_decimal:
+                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Multiple decimal points detected.")
+                has_decimal = True
             else:
-                pos_start = self.pos.copy()
-                char = self.current_char
+                if has_decimal:
+                    decimal_count += 1
+            num_str += self.current_char
+            self.advance()
+
+        if self.current_char is not None and self.current_char in ALPHABETS + '_':
+            while self.current_char is not None and self.current_char in ALPHABETS + '_':
+                num_str += self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
+            return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'. Numbers cannot contain alphabetic characters.")
 
-        tokens.append(Token('EOF', None, self.pos.copy(), self.pos.copy()))
-        print(f"Generated tokens: {tokens}")  # Debugging
-        return tokens, None
+        try:
+            if has_decimal:
+                real_number = float(num_str)
+                if decimal_count > 7:  #
+                    token = Token('DOUBLE', real_number)
+                else:  
+                    token = Token('FLOAT', real_number)
+            else:
+                integer_number = int(num_str)
+                if -32768 <= integer_number <= 32767: 
+                    token = Token('INTEGER', integer_number)
+                else:
+                    token = Token('LONG', integer_number)
 
+            self.prev_token_type = token.type  
+            return token
+        except ValueError:
+            return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
 
     def make_identifier_or_keyword(self):
         id_str = ''
         pos_start = self.pos.copy()
 
-        if self.current_char is not None and self.current_char in ALPHABETS:
-            id_str += self.current_char
-            self.advance()
-        else:
+        if self.current_char is None or self.current_char not in ALPHABETS:
+            while self.current_char is not None and self.current_char in ALPHABETS + DIGITS + '_':
+                id_str += self.current_char
+                self.advance()
             pos_end = self.pos.copy()
             return IllegalCharError(pos_start, pos_end, 
-                f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
+                                    f"Invalid identifier '{id_str}' (Identifiers must begin with a letter).")
 
-        while self.current_char is not None and self.current_char not in set(WHITESPACE).union(set(SYMBOLS)):
+        tokens = [] 
+
+        while self.current_char is not None and (
+            self.current_char in ALPHABETS + DIGITS + '_' or self.current_char == '.'):
+            if self.current_char == '.':
+                if id_str in RESERVED_WORDS or id_str in KEYWORDS:
+                    token = Token('RESERVED_WORD', id_str)
+                else:
+                    token = Token('IDENTIFIER', id_str)
+                self.prev_token_type = token.type
+                self.advance()
+                tokens.append(token)
+                tokens.append(Token('ACCESSOR_SYMBOL', '.'))
+                return tokens
             id_str += self.current_char
             self.advance()
-        
-        if not all(char in ALPHABETS + DIGITS + '_' for char in id_str):
-            return IllegalCharError(pos_start, self.pos, 
-                f"Invalid identifier '{id_str}' (Identifiers can only include letters, digits, and underscores).")
 
-        if id_str in DATA_TYPES:
-            return Token('DATA_TYPE', id_str, pos_start, self.pos.copy())
-        elif id_str in BOOLEAN_VALUES:
-            return Token('BOOLEAN', id_str, pos_start, self.pos.copy())
-        elif id_str in KEYWORDS:
-            return Token('KEYWORD', id_str, pos_start, self.pos.copy())
-        elif id_str in RESERVED_WORDS:
-            return Token('RESERVED_WORDS', id_str, pos_start, self.pos.copy())
+        for noise_word in NOISE_WORDS:
+            if noise_word in id_str:
+                tokens.append(Token('NOISE_WORD', noise_word))
+
+        normalized = NOISE_WORD_RULES.get(id_str, id_str)
+        if normalized in DATA_TYPES:
+            tokens.append(Token('DATA_TYPE', normalized))
+        elif normalized in BOOLEAN_VALUES:
+            tokens.append(Token('BOOLEAN', normalized))
+        elif normalized in KEYWORDS:
+            tokens.append(Token('KEYWORD', normalized))
+        elif normalized in RESERVED_WORDS:
+            tokens.append(Token('RESERVED_WORD', normalized))
         else:
-            return Token('IDENTIFIER', id_str, pos_start, self.pos.copy())
+            tokens.append(Token('IDENTIFIER', id_str))
+
+        return tokens
+    
+    def make_tokens(self):
+        tokens = []
+        errors = []
+
+        while self.current_char is not None:
+            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
+                self.advance()
+
+            elif self.current_char == '#':
+                comment_token = self.make_comment()
+                if isinstance(comment_token, Error):
+                    errors.append(comment_token)
+                else:
+                    tokens.append(comment_token)
+
+            elif self.current_char in SYMBOLS:
+                token_or_error = self.make_symbol()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
+                else:
+                    tokens.append(token_or_error)
+
+            elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
+                token_or_error = self.make_number()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
+                else:
+                    tokens.append(token_or_error)
+
+            elif self.current_char in ALPHABETS or self.current_char == '_':
+                token_or_tokens = self.make_identifier_or_keyword()
+                if isinstance(token_or_tokens, list):
+                    tokens.extend(token_or_tokens)
+                elif isinstance(token_or_tokens, Error):
+                    errors.append(token_or_tokens)
+                else:
+                    tokens.append(token_or_tokens)
+
+            elif self.current_char == '"':
+                tokens_or_error = self.make_string()  
+                if isinstance(tokens_or_error, Error): 
+                    errors.append(tokens_or_error)
+                else:
+                    tokens.extend(tokens_or_error) 
+
+            elif self.current_char == "'":
+                token = self.make_character()
+                if isinstance(token, Error):
+                    errors.append(token)
+                else:
+                    tokens.append(token)
+
+            else:
+                pos_start = self.pos.copy()
+                char = self.current_char
+                self.advance()
+                errors.append(IllegalCharError(pos_start, self.pos, char))
+
+        return tokens, errors
     
     def make_string(self):
         str_val = ''
         pos_start = self.pos.copy()
+        tokens = []
         self.advance()  
 
         while self.current_char is not None:
-            if self.current_char == '\\':  
+            if self.current_char == '\\': 
                 self.advance()
                 escape_chars = {
                     'n': '\n', 't': '\t', '"': '"', "'": "'", '\\': '\\'
                 }
                 str_val += escape_chars.get(self.current_char, self.current_char)
-            elif self.current_char == '"': 
+            elif self.current_char == '"':  
                 self.advance()
-                return Token('STRING_LITERAL', str_val, pos_start, self.pos.copy())
+                if str_val:  
+                    tokens.append(Token('STRING_LITERAL', str_val))
+                return tokens
+            elif self.current_char == '{': 
+                if str_val: 
+                    tokens.append(Token('STRING_LITERAL', str_val))
+                    str_val = ''
+                tokens.append(Token('PARENTHESIS', '{'))
+                self.advance()  
+                embedded_val = ''
+                while self.current_char is not None and self.current_char != '}':
+                    embedded_val += self.current_char
+                    self.advance()
+                if self.current_char == '}': 
+                    tokens.append(Token('IDENTIFIER', embedded_val.strip()))  
+                    tokens.append(Token('PARENTHESIS', '}'))  
+                    self.advance()
+                else:
+                    return UnclosedStringError(pos_start, self.pos, "String literal was not closed.")
             else:
-                str_val += self.current_char
+                str_val += self.current_char  
             self.advance()
 
-        return UnclosedStringError(pos_start, self.pos)
-    
-    def make_number(self):
-        num_str = ''
-        has_decimal = False
-        pos_start = self.pos.copy()
-
-        while self.current_char is not None and self.current_char in DIGITS + '.':
-            if self.current_char == '.':
-                if has_decimal:
-                    return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str + self.current_char}'")
-                has_decimal = True
-            num_str += self.current_char
-            self.advance()
-
-        try:
-            if has_decimal:
-                return Token('REAL_NUMBER', float(num_str), pos_start, self.pos.copy())
-            else:
-                return Token('INTEGER', int(num_str), pos_start, self.pos.copy())
-        except ValueError:
-            return InvalidNumberError(pos_start, self.pos, f"Invalid number '{num_str}'")
-
+        if str_val:  
+            tokens.append(Token('STRING_LITERAL', str_val))
+        return tokens
+        
 
     def make_character(self):
         pos_start = self.pos.copy()
-        self.advance()  
+        self.advance() 
 
         if self.current_char is None or self.current_char == "'":
-            return IllegalCharError(pos_start, self.pos, "Empty character literal")
+            self.advance() 
+            return IllegalCharError(
+                pos_start,
+                self.pos,
+                "Character literal is empty. A character literal must contain exactly one character."
+            )
 
-        char_val = self.current_char  
+        char_val = self.current_char
+        self.advance()  
+
+        if self.current_char != "'":
+            if self.current_char is not None:
+                char_val += self.current_char 
+                self.advance()
+
+            if self.current_char != "'":
+                while self.current_char is not None and self.current_char != "'":
+                    self.advance()
+                return IllegalCharError(
+                    pos_start,
+                    self.pos,
+                    f"Unclosed character literal starting with '{char_val}'."
+                )
+            else:
+                self.advance()  
+                return IllegalCharError(
+                    pos_start,
+                    self.pos,
+                    f"Character literal '{char_val}' is invalid. A character literal must contain exactly one character."
+                )
 
         self.advance()  
-        if self.current_char != "'":  
-            return IllegalCharError(pos_start, self.pos, "Unclosed character literal")
-
-        self.advance() 
-        return Token('CHARACTER_LITERAL', char_val, pos_start, self.pos.copy())
+        return Token('CHARACTER_LITERAL', char_val)
 
     def make_symbol(self):
         pos_start = self.pos.copy()
         symbol_str = self.current_char
         self.advance()
 
-        if symbol_str == '+' or symbol_str == '-':
-            if self.current_char == symbol_str: 
-                symbol_str += self.current_char
-                self.advance()
-
-        while self.current_char is not None and (symbol_str + self.current_char) in (
-            ARITHMETIC_OPERATORS + RELATIONAL_OPERATORS + ASSIGNMENT_OPERATORS +
-            BITWISE_OPERATORS + LOGICAL_OPERATORS + UNARY_OPERATORS
+        while self.current_char is not None and (
+            symbol_str + self.current_char
+        ) in (
+            ARITHMETIC_OPERATORS
+            + RELATIONAL_OPERATORS
+            + ASSIGNMENT_OPERATORS
+            + BITWISE_OPERATORS
+            + LOGICAL_OPERATORS
+            + UNARY_OPERATORS
         ):
             symbol_str += self.current_char
             self.advance()
 
-        if symbol_str == '++':
-            token = Token('UNARY_OPERATOR', '++')
+        if (symbol_str in ['++', '--'] and 
+            (self.current_char == '+' or self.current_char == '-')):
+            return IllegalCharError(pos_start, self.pos, f"Unexpected trailing '{self.current_char}' after unary operator '{symbol_str}'.")
+
+        if symbol_str in ASSIGNMENT_OPERATORS:
+            if symbol_str == '=':
+                token = Token('ASSIGN_OP', symbol_str) 
+            elif symbol_str == '+=':
+                token = Token('ADD_ASSIGN_OP', symbol_str)
+            elif symbol_str == '-=':
+                token = Token('SUBT_ASSIGN_OP', symbol_str)
+            elif symbol_str == '*=':
+                token = Token('MULTIPLY_ASSIGN_OP', symbol_str)
+            elif symbol_str == '/=':
+                token = Token('DIV_ASSIGN_OP', symbol_str)
+            elif symbol_str == '%=':
+                token = Token('MOD_ASSIGN_OP', symbol_str)
+            elif symbol_str in '^=': 
+                token = Token('XOR_ASSIGN_OP', symbol_str) 
+            elif symbol_str in '~=': 
+                token = Token('INT_DIV_ASSIGN_OP', symbol_str)
+            elif symbol_str == '**=':
+                token = Token('EXPONENTIAL_ASSIGN_OP', symbol_str)
+            elif symbol_str == '&=':
+                token = Token('BITWISE_AND_ASSIGN_OP', symbol_str)
+            elif symbol_str == '`=': 
+                token = Token('BITWISE_OR_ASSIGN_OP', symbol_str) 
+            elif symbol_str == '<<=':
+                token = Token('L_SHIFT_ASSIGN_OP', symbol_str)
+            elif symbol_str == '>>=':
+                token = Token('R_SHIFT_ASSIGN_OP', symbol_str)
+
+        elif symbol_str in ['+', '-']:
+            if self.prev_token_type in ['IDENTIFIER', 'INTEGER', 'REAL_NUMBER', 'CLOSING_PARENTHESIS']:
+                if symbol_str == '+':
+                    token = Token('ADD_OPERATOR', symbol_str)
+                elif symbol_str == '-':
+                    token = Token('SUBTRACT_OPERATOR', symbol_str)
+            elif self.prev_token_type in ['ARITHMETIC_OPERATOR', 'UNARY_OPERATOR', None]:
+                token = Token('UNARY_OPERATOR', symbol_str)
+            else:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)  
+
+        elif symbol_str == '++':
+            token = Token('INCREMENT_UNARY_OP', '++')
         elif symbol_str == '--':
-            token = Token('UNARY_OPERATOR', '--')
-        elif symbol_str == '-':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str, pos_start, self.pos.copy())
-        elif symbol_str == '+':
-            token = Token('ARITHMETIC_OPERATOR', symbol_str, pos_start, self.pos.copy())
+            token = Token('DECREMENT_UNARY_OP', '--')
+
         elif symbol_str in ARITHMETIC_OPERATORS:
-            token = Token('ARITHMETIC_OPERATOR', symbol_str, pos_start, self.pos.copy())
+            if symbol_str == '*':
+                token = Token('MULTIPLY_OP', symbol_str)
+            elif symbol_str == '/':
+                token = Token('DIVIDE_OP', symbol_str)
+            elif symbol_str == '%':
+                token = Token('MODULO_OP', symbol_str)
+            elif symbol_str == '**':
+                token = Token('EXPONENTIATION_OP', symbol_str) 
+            else:
+                token = Token('ARITHMETIC_OPERATOR', symbol_str)
+
         elif symbol_str in RELATIONAL_OPERATORS:
-            token = Token('RELATIONAL_OPERATOR', symbol_str, pos_start, self.pos.copy())
-        elif symbol_str in ASSIGNMENT_OPERATORS:
-            token = Token('ASSIGNMENT_OPERATOR', symbol_str, pos_start, self.pos.copy())
-        elif symbol_str in BITWISE_OPERATORS:
-            token = Token('BITWISE_OPERATOR', symbol_str, pos_start, self.pos.copy())
+            if symbol_str == '<':
+                token = Token('LESS_THAN', symbol_str) 
+            elif symbol_str == '>':
+                token = Token('GREATER_THAN', symbol_str) 
+            elif symbol_str == '<=':
+                token = Token('LESS_THAN_OR_EQUAL_TO', symbol_str) 
+            elif symbol_str == '>=':
+                token = Token('GREATER_THAN_OR_EQUAL_TO', symbol_str) 
+            elif symbol_str == '==':
+                token = Token('EQUAL_TO', symbol_str) 
+            elif symbol_str == '!=':
+                token = Token('NOT_EQUAL_TO', symbol_str) 
+            else:
+                token = Token('RELATIONAL_OPERATOR', symbol_str) 
+
         elif symbol_str in LOGICAL_OPERATORS:
-            token = Token('LOGICAL_OPERATOR', symbol_str, pos_start, self.pos.copy())
+            token = Token('LOGICAL_OPERATOR', symbol_str)
+            if symbol_str == '!':
+                token = Token('NOT_LOGICAL_OP', symbol_str) 
+            elif symbol_str == '&&':
+                token = Token('AND_LOGICAL_OP', symbol_str)  
+            elif symbol_str == '||':
+                token = Token('OR_LOGICAL_OP', symbol_str)
+
+        elif symbol_str in BITWISE_OPERATORS:
+            if symbol_str == '&':
+                token = Token('BITWISE_AND_OP', symbol_str)
+            elif symbol_str == '`': 
+                token = Token('BITWISE_OR_OP', symbol_str)
+            elif symbol_str == '^':
+                token = Token('BITWISE_XOR_OP', symbol_str)
+            elif symbol_str == '<<':
+                token = Token('LEFT_SHIFT_OP', symbol_str)
+            elif symbol_str == '>>':
+                token = Token('RIGHT_SHIFT_OP', symbol_str)
+            elif symbol_str == '~':
+                token = Token('BITWISE_NOT_OP', symbol_str) # to be changed 
+            else:
+                token = Token('BITWISE_OP', symbol_str) 
+
         elif symbol_str in SPECIAL_SYMBOLS:
-            token = Token('SPECIAL_SYMBOL', symbol_str, pos_start, self.pos.copy())
+            if symbol_str == '|':
+                token = Token('PIPE_SYMBOL', symbol_str)
+            elif symbol_str == ':':
+                token = Token('COLON_SYMBOL', symbol_str)
+            elif symbol_str == '`':
+                token = Token('BACKTICK_SYMBOL', symbol_str)
+            elif symbol_str == '\\':
+                token = Token('BACKSLASH_SYMBOL', symbol_str)
+            elif symbol_str == '@':
+                token = Token('AT_SYMBOL', symbol_str)
+            elif symbol_str == '#':
+                token = Token('HASH_SYMBOL', symbol_str)
+            elif symbol_str == '$':
+                token = Token('DOLLAR_SYMBOL', symbol_str)
+            elif symbol_str == '~':
+                token = Token('TILDE_SYMBOL', symbol_str)
+            elif symbol_str == '"':
+                token = Token('DOUBLE_QUOTE_SYMBOL', symbol_str)
+            elif symbol_str == "'":
+                token = Token('SINGLE_QUOTE_SYMBOL', symbol_str)
+            else:
+                token = Token('SPECIAL_SYMBOL', symbol_str) 
+
         elif symbol_str in TERMINATING_SYMBOLS:
-            token = Token('TERMINATING_SYMBOL', symbol_str, pos_start, self.pos.copy())
+            if symbol_str == ';':
+                token = Token('SEMICOLON', symbol_str)
+            else:
+                token = Token('TERMINATING_SYMBOL', symbol_str) 
         elif symbol_str in SEPARATING_SYMBOLS:
-            token = Token('SEPARATING_SYMBOL', symbol_str, pos_start, self.pos.copy())
+            token = Token('SEPARATING_SYMBOL', symbol_str)
+            
         elif symbol_str in PARENTHESIS:
-            token = Token('PARENTHESIS', symbol_str, pos_start, self.pos.copy())
-        elif symbol_str in SYMBOLS or symbol_str in PARENTHESIS:
-            return Token('SYMBOL' if symbol_str not in PARENTHESIS else 'PARENTHESIS', symbol_str)
+            if symbol_str == '(':
+                token = Token('L_PARENTHESIS', symbol_str) 
+            elif symbol_str == ')':
+                token = Token('R_PARENTHESIS', symbol_str)
+            elif symbol_str == '{':
+                token = Token('L_CURLY', symbol_str) 
+            elif symbol_str == '}':
+                token = Token('R_CURLY', symbol_str) 
+            elif symbol_str == '[':
+                token = Token('L_BRACKET', symbol_str)
+            elif symbol_str == ']':
+                token = Token('R_BRACKET', symbol_str)
+            else:
+                token = Token('PARENTHESIS', symbol_str) 
+        elif symbol_str == '.' and self.prev_token_type in ['RESERVED_WORD', 'IDENTIFIER']:
+            token = Token('ACCESSOR_SYMBOL', symbol_str)
         else:
             return IllegalCharError(pos_start, self.pos, f"Unknown symbol '{symbol_str}'")
 
@@ -354,7 +649,7 @@ class Lexer:
                 if self.text[self.pos.idx:self.pos.idx+2] == '##':
                     self.advance()
                     self.advance()
-                    return Token('COMMENT', comment_text.strip(), pos_start, self.pos.copy())
+                    return Token('COMMENT', comment_text.strip())
                 comment_text += self.current_char
                 self.advance()
             return UnclosedStringError(pos_start, self.pos)
@@ -367,7 +662,7 @@ class Lexer:
                 self.advance()
             if self.current_char == '#':
                 self.advance()  
-                return Token('COMMENT', comment_text.strip(), pos_start, self.pos.copy())
+                return Token('COMMENT', comment_text.strip())
             return UnclosedStringError(pos_start, self.pos, "Unclosed single-line comment")
 
         else:
@@ -391,47 +686,48 @@ class Lexer:
 #                RUN                  #
 #######################################
 
-import os
 from prettytable import PrettyTable 
+
 
 def run(fn, text):
     if not fn.endswith('.lit'):
         return [], f"Invalid file extension: '{fn}'. Only '.lit' files are allowed."
 
     lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
+    tokens, errors = lexer.make_tokens()
 
-    if error:
-        return [], error.as_string()
+    for error in errors:
+        print(error.as_string())
 
-    symbol_table = {}
-
-    for token in tokens:
-        if token.type not in symbol_table:
-            symbol_table[token.type] = []
-        symbol_table[token.type].append(token.value)
-
-    with open("symbol_table.txt", "w") as f:
+    output_filepath = f"{fn.replace('.lit', '_output.txt')}"
+    with open(output_filepath, "w") as f:
         f.write("--------------- Input ---------------\n")
         f.write(text + "\n\n")
-        
+
         f.write("----------- Tokens Table ------------\n")
         token_table = PrettyTable()
-        token_table.field_names = ["Token Specification", "Tokens"]
+        token_table.field_names = ["Lexeme", "Token Specification"]
 
         for token in tokens:
-            token_table.add_row([token.type, token.value])
-        
+            if isinstance(token, Error): 
+                continue
+            token_table.add_row([token.value, token.type])
+
         f.write(token_table.get_string())
         f.write("\n\n")
 
-        f.write("----------- Symbol Table ------------\n")
-        symbol_table_table = PrettyTable()
-        symbol_table_table.field_names = ["Token Specification", "Tokens"]
+        f.write("----------- Errors Table ------------\n")
+        if errors:
+            error_table = PrettyTable()
+            error_table.field_names = ["Error Type", "Details", "Location"]
+            for error in errors:
+                error_table.add_row([
+                    error.error_name,
+                    error.details,
+                    f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
+                ])
+            f.write(error_table.get_string())
+        else:
+            f.write("No errors found.\n")
 
-        for token_type, values in symbol_table.items():
-            symbol_table_table.add_row([token_type, ", ".join(map(str, values))])
-
-        f.write(symbol_table_table.get_string())
-
-    return tokens, None
+    return tokens, errors

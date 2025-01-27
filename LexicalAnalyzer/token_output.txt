@@ -1,0 +1,357 @@
+--------------- Input ---------------
+volume(cubic.m) = volumeOf.sphere(10); 
+
+new_value(cm) = num(m);
+
+
+# identifiers #
+ThisIsAnIdentifer
+My_Num
+Num
+num09
+
+# assignment operators #
+=
++=
+-=
+*=
+/=
+%=
+~=
+**=
+&=
+`=
+^=
+<<=
+>>=
+
+# arithmetic operators # 
+*
+/
+%
+**
+++
+--
+# sample arithmetic application for + & -#
+(x - y) * -z
+
+# boolean operators # 
+!
+&&
+||
+==
+!=
+>
+<
+>=
+<=
+
+
+# bitwise operators #
+&
+`
+^
+~
+<<
+>>
+
+# keywords # 
+break
+case
+catch
+class
+const
+continue
+def
+default
+do
+each
+else
+extends
+finally
+for
+if
+implements
+import
+input
+main
+new
+package
+print
+println
+private
+protected
+public
+repeat
+return
+static
+switch
+this
+throw
+throws
+try
+while
+
+# reserved words # 
+areaOf
+circle
+circumference
+cm
+cube
+cubic
+distance
+fetch
+ft
+height
+in
+kg
+km
+l
+lbs
+length
+m
+mg
+mm
+perimeterOf
+radius
+rectangle
+setprecision
+side
+sphere
+sq
+square
+triangle
+volumeOf
+width
+
+# noise word #
+constant 
+define
+integer 
+character
+
+# constant values #
+0
+3.14
+2.718281828459045
+"infinity"
+'i'
+true
+
+# comments #
+# this is a single line comment #
+## this is multi-line 
+comment ##
+
+# delimiters and bracket #
+;
+,
+: 
+#"#
+#"#
+#'#
+#'#
+{
+}
+[
+]
+(
+)
+
+# invalids #
+143c
+'Aa'
+_volumeOfcircle
+
+----------- Tokens Table ------------
++-----------------------------------------+--------------------------+
+|                  Lexeme                 |   Token Specification    |
++-----------------------------------------+--------------------------+
+|                  volume                 |        IDENTIFIER        |
+|                    (                    |      L_PARENTHESIS       |
+|                  cubic                  |      RESERVED_WORD       |
+|                    .                    |     ACCESSOR_SYMBOL      |
+|                    m                    |      RESERVED_WORD       |
+|                    )                    |      R_PARENTHESIS       |
+|                    =                    |        ASSIGN_OP         |
+|                 volumeOf                |      RESERVED_WORD       |
+|                    .                    |     ACCESSOR_SYMBOL      |
+|                  sphere                 |      RESERVED_WORD       |
+|                    (                    |      L_PARENTHESIS       |
+|                    10                   |         INTEGER          |
+|                    )                    |      R_PARENTHESIS       |
+|                    ;                    |        SEMICOLON         |
+|                new_value                |        IDENTIFIER        |
+|                    (                    |      L_PARENTHESIS       |
+|                    cm                   |      RESERVED_WORD       |
+|                    )                    |      R_PARENTHESIS       |
+|                    =                    |        ASSIGN_OP         |
+|                   num                   |        IDENTIFIER        |
+|                    (                    |      L_PARENTHESIS       |
+|                    m                    |      RESERVED_WORD       |
+|                    )                    |      R_PARENTHESIS       |
+|                    ;                    |        SEMICOLON         |
+|               identifiers               |         COMMENT          |
+|            ThisIsAnIdentifer            |        IDENTIFIER        |
+|                  My_Num                 |        IDENTIFIER        |
+|                   Num                   |        IDENTIFIER        |
+|                  num09                  |        IDENTIFIER        |
+|           assignment operators          |         COMMENT          |
+|                    =                    |        ASSIGN_OP         |
+|                    +=                   |      ADD_ASSIGN_OP       |
+|                    -=                   |      SUBT_ASSIGN_OP      |
+|                    *=                   |    MULTIPLY_ASSIGN_OP    |
+|                    /=                   |      DIV_ASSIGN_OP       |
+|                    %=                   |      MOD_ASSIGN_OP       |
+|                    ~=                   |    INT_DIV_ASSIGN_OP     |
+|                   **=                   |  EXPONENTIAL_ASSIGN_OP   |
+|                    &=                   |  BITWISE_AND_ASSIGN_OP   |
+|                    `=                   |   BITWISE_OR_ASSIGN_OP   |
+|                    ^=                   |      XOR_ASSIGN_OP       |
+|                   <<=                   |    L_SHIFT_ASSIGN_OP     |
+|                   >>=                   |    R_SHIFT_ASSIGN_OP     |
+|           arithmetic operators          |         COMMENT          |
+|                    *                    |       MULTIPLY_OP        |
+|                    /                    |        DIVIDE_OP         |
+|                    %                    |        MODULO_OP         |
+|                    **                   |    EXPONENTIATION_OP     |
+|                    ++                   |    INCREMENT_UNARY_OP    |
+|                    --                   |    DECREMENT_UNARY_OP    |
+| sample arithmetic application for + & - |         COMMENT          |
+|                    (                    |      L_PARENTHESIS       |
+|                    x                    |        IDENTIFIER        |
+|                    -                    |   ARITHMETIC_OPERATOR    |
+|                    y                    |        IDENTIFIER        |
+|                    )                    |      R_PARENTHESIS       |
+|                    *                    |       MULTIPLY_OP        |
+|                    -                    |   ARITHMETIC_OPERATOR    |
+|                    z                    |        IDENTIFIER        |
+|            boolean operators            |         COMMENT          |
+|                    !                    |      NOT_LOGICAL_OP      |
+|                    &&                   |      AND_LOGICAL_OP      |
+|                    ||                   |      OR_LOGICAL_OP       |
+|                    ==                   |         EQUAL_TO         |
+|                    !=                   |       NOT_EQUAL_TO       |
+|                    >                    |       GREATER_THAN       |
+|                    <                    |        LESS_THAN         |
+|                    >=                   | GREATER_THAN_OR_EQUAL_TO |
+|                    <=                   |  LESS_THAN_OR_EQUAL_TO   |
+|            bitwise operators            |         COMMENT          |
+|                    &                    |      BITWISE_AND_OP      |
+|                    `                    |      BITWISE_OR_OP       |
+|                    ^                    |      BITWISE_XOR_OP      |
+|                    ~                    |      BITWISE_NOT_OP      |
+|                    <<                   |      LEFT_SHIFT_OP       |
+|                    >>                   |      RIGHT_SHIFT_OP      |
+|                 keywords                |         COMMENT          |
+|                  break                  |         KEYWORD          |
+|                   case                  |         KEYWORD          |
+|                  catch                  |         KEYWORD          |
+|                  class                  |         KEYWORD          |
+|                  const                  |         KEYWORD          |
+|                 continue                |         KEYWORD          |
+|                   def                   |         KEYWORD          |
+|                 default                 |         KEYWORD          |
+|                    do                   |         KEYWORD          |
+|                   each                  |         KEYWORD          |
+|                   else                  |         KEYWORD          |
+|                 extends                 |         KEYWORD          |
+|                 finally                 |         KEYWORD          |
+|                   for                   |         KEYWORD          |
+|                    if                   |         KEYWORD          |
+|                implements               |         KEYWORD          |
+|                  import                 |         KEYWORD          |
+|                  input                  |         KEYWORD          |
+|                   main                  |         KEYWORD          |
+|                   new                   |         KEYWORD          |
+|                 package                 |         KEYWORD          |
+|                  print                  |         KEYWORD          |
+|                 println                 |         KEYWORD          |
+|                 private                 |         KEYWORD          |
+|                protected                |         KEYWORD          |
+|                  public                 |         KEYWORD          |
+|                  repeat                 |         KEYWORD          |
+|                  return                 |         KEYWORD          |
+|                  static                 |         KEYWORD          |
+|                  switch                 |         KEYWORD          |
+|                   this                  |         KEYWORD          |
+|                  throw                  |         KEYWORD          |
+|                  throws                 |         KEYWORD          |
+|                   try                   |         KEYWORD          |
+|                  while                  |         KEYWORD          |
+|              reserved words             |         COMMENT          |
+|                  areaOf                 |      RESERVED_WORD       |
+|                  circle                 |      RESERVED_WORD       |
+|              circumference              |      RESERVED_WORD       |
+|                    cm                   |      RESERVED_WORD       |
+|                   cube                  |      RESERVED_WORD       |
+|                  cubic                  |      RESERVED_WORD       |
+|                 distance                |      RESERVED_WORD       |
+|                  fetch                  |      RESERVED_WORD       |
+|                    ft                   |      RESERVED_WORD       |
+|                  height                 |      RESERVED_WORD       |
+|                    in                   |      RESERVED_WORD       |
+|                    kg                   |      RESERVED_WORD       |
+|                    km                   |      RESERVED_WORD       |
+|                    l                    |      RESERVED_WORD       |
+|                   lbs                   |      RESERVED_WORD       |
+|                  length                 |      RESERVED_WORD       |
+|                    m                    |      RESERVED_WORD       |
+|                    mg                   |      RESERVED_WORD       |
+|                    mm                   |      RESERVED_WORD       |
+|               perimeterOf               |      RESERVED_WORD       |
+|                  radius                 |      RESERVED_WORD       |
+|                rectangle                |      RESERVED_WORD       |
+|               setprecision              |      RESERVED_WORD       |
+|                   side                  |      RESERVED_WORD       |
+|                  sphere                 |      RESERVED_WORD       |
+|                    sq                   |      RESERVED_WORD       |
+|                  square                 |      RESERVED_WORD       |
+|                 triangle                |      RESERVED_WORD       |
+|                 volumeOf                |      RESERVED_WORD       |
+|                  width                  |      RESERVED_WORD       |
+|                noise word               |         COMMENT          |
+|                   ant                   |        NOISE_WORD        |
+|                  const                  |         KEYWORD          |
+|                   ine                   |        NOISE_WORD        |
+|                   def                   |         KEYWORD          |
+|                   eger                  |        NOISE_WORD        |
+|                   int                   |        DATA_TYPE         |
+|                  acter                  |        NOISE_WORD        |
+|                   char                  |        DATA_TYPE         |
+|             constant values             |         COMMENT          |
+|                    0                    |         INTEGER          |
+|                   3.14                  |          FLOAT           |
+|            2.718281828459045            |          DOUBLE          |
+|                 infinity                |      STRING_LITERAL      |
+|                    i                    |    CHARACTER_LITERAL     |
+|                   true                  |         BOOLEAN          |
+|                 comments                |         COMMENT          |
+|      this is a single line comment      |         COMMENT          |
+|           this is multi-line            |         COMMENT          |
+|                 comment                 |                          |
+|          delimiters and bracket         |         COMMENT          |
+|                    ;                    |        SEMICOLON         |
+|                    ,                    |    SEPARATING_SYMBOL     |
+|                    :                    |       COLON_SYMBOL       |
+|                    "                    |         COMMENT          |
+|                    "                    |         COMMENT          |
+|                    '                    |         COMMENT          |
+|                    '                    |         COMMENT          |
+|                    {                    |         L_CURLY          |
+|                    }                    |         R_CURLY          |
+|                    [                    |        L_BRACKET         |
+|                    ]                    |        R_BRACKET         |
+|                    (                    |      L_PARENTHESIS       |
+|                    )                    |      R_PARENTHESIS       |
+|                 invalids                |         COMMENT          |
++-----------------------------------------+--------------------------+
+
+----------- Errors Table ------------
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
+|     Error Type    |                                                   Details                                                    |      Location      |
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+
+|   Invalid Number  |                     Invalid number '143c'. Numbers cannot contain alphabetic characters.                     | Line 161, Column 1 |
+| Illegal Character | 'Character literal 'Aa' is invalid. A character literal must contain exactly one character.' is not allowed. | Line 162, Column 1 |
+| Illegal Character |        'Invalid identifier '_volumeOfcircle' (Identifiers must begin with a letter).' is not allowed.        | Line 163, Column 1 |
++-------------------+--------------------------------------------------------------------------------------------------------------+--------------------+

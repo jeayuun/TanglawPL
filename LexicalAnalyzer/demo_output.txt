@@ -1,0 +1,25 @@
+--------------- Input ---------------
+int _volumeOfSphere = 143c;
+char a = 'BAB';
+
+----------- Tokens Table ------------
++--------+---------------------+
+| Lexeme | Token Specification |
++--------+---------------------+
+|  int   |      DATA_TYPE      |
+|   =    |      ASSIGN_OP      |
+|   ;    |      SEMICOLON      |
+|  char  |      DATA_TYPE      |
+|   a    |      IDENTIFIER     |
+|   =    |      ASSIGN_OP      |
++--------+---------------------+
+
+----------- Errors Table ------------
++-------------------+------------------------------------------------------------------------------------------------+-------------------+
+|     Error Type    |                                            Details                                             |      Location     |
++-------------------+------------------------------------------------------------------------------------------------+-------------------+
+| Illegal Character | 'Invalid identifier '_volumeOfSphere' (Identifiers must begin with a letter).' is not allowed. |  Line 1, Column 5 |
+|   Invalid Number  |              Invalid number '143c'. Numbers cannot contain alphabetic characters.              | Line 1, Column 23 |
+| Illegal Character |                'Unclosed character literal starting with 'BA'.' is not allowed.                | Line 2, Column 10 |
+| Illegal Character |                'Unclosed character literal starting with ';'.' is not allowed.                 | Line 2, Column 14 |
++-------------------+------------------------------------------------------------------------------------------------+-------------------+
