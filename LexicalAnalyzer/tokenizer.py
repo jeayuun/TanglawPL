@@ -116,12 +116,15 @@ class Position:
 #######################################
 
 class Token:
-    def __init__(self, type_, value=None):
+    def __init__(self, type_, value=None, pos_start=None, pos_end=None):
         self.type = type_
         self.value = value
-    
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
     def __repr__(self):
-        if self.value: return f'{self.type}: {self.value}'
+        if self.value:
+            return f'{self.type}: {self.value}'
         return f'{self.type}'
 
 #######################################

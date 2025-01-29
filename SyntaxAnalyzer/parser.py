@@ -257,7 +257,7 @@ def run_parser(input_text):
 
 if __name__ == "__main__":
     while True:
-        text = input("parse> ")
+        text = input("parse enter text here> ")
         if text.lower() in {"exit", "quit"}:
             break
         run_parser(text)

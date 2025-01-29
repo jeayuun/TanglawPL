@@ -1,45 +1,68 @@
-import sys
-from tokenizer import Lexer
-from syntax_parser import Parser
+import tokenizer
+from pathlib import Path
+from prettytable import PrettyTable
 
-#######################################
-#                RUN                  #
-#######################################
+def process_file(filename):
+    if not filename.endswith('.lit'):
+        print(f"Error: '{filename}' is not a valid .lit file.")
+        return
 
-def run(fn, text):
-    # Tokenize input
-    lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
-    if error:
-        return None, error.as_string()
+    try:
+        downloads_folder = Path.home() / "Downloads"
+        input_filepath = downloads_folder / filename
 
-    # Parse input
-    parser = Parser(tokens)
-    ast = parser.parse()
+        if not input_filepath.exists():
+            print(f"\nError: The file '{input_filepath}' does not exist in the Downloads folder.")
+            return
 
-    if ast.error:
-        return None, ast.error
+        with open(input_filepath, 'r') as file:
+            text = file.read()
 
-    return ast.node, None
+        tokens, errors = tokenizer.run(filename, text)
 
-if __name__ == "__main__":
-    print("Welcome to the Interactive Parser!")
-    print("Type your code below and press Enter to evaluate. Type 'exit' to quit.")
+        output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
-    while True:
-        try:
-            text = input(">>> ")  # Prompt for user input
-            if text.strip().lower() == "exit":
-                print("Goodbye!")
-                break
+        with open(output_filename, 'w') as output_file:
+            output_file.write("--------------- Input ---------------\n")
+            output_file.write(text + "\n\n")
 
-            result, error = run("<stdin>", text)  # Use <stdin> as filename for context
+            output_file.write("----------- Tokens Table ------------\n")
+            token_table = PrettyTable()
+            token_table.field_names = ["Lexeme", "Token Specification"]
 
-            if error:
-                print(error)
+            for token in tokens:
+                if isinstance(token, list): 
+                    for sub_token in token:
+                        token_table.add_row([sub_token.value, sub_token.type])
+                else:
+                    token_table.add_row([token.value, token.type])
+
+            output_file.write(token_table.get_string() + "\n\n")
+
+            output_file.write("----------- Errors Table ------------\n")
+            if errors:
+                error_table = PrettyTable()
+                error_table.field_names = ["Error Type", "Details", "Location"]
+                for error in errors:
+                    error_table.add_row([
+                        error.error_name,
+                        error.details,
+                        f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
+                    ])
+                output_file.write(error_table.get_string())
             else:
-                print("AST:", result)
+                output_file.write("No errors found.\n")
 
-        except KeyboardInterrupt:
-            print("\nGoodbye!")
-            break
+        print(f"\nOutput saved to {output_filename}")
+
+    except UnicodeDecodeError as e:
+        print(f"Encoding error: {e}")
+        print("Try using a different encoding such as 'latin-1' or ensure the file is UTF-8 encoded.")
+    except FileNotFoundError:
+        print(f"Error: The file '{filename}' does not exist.")
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == '__main__':
+    filename = input("Enter the .lit file name from the Downloads folder: ")
+    process_file(filename)
