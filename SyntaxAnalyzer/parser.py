@@ -1,5 +1,7 @@
 from tokenizer import Lexer, Token
+# to fix this pass values
 
+# prints out ast nodes
 class ASTNode:
     def __init__(self, type_, value=None, children=None):
         self.type = type_
@@ -9,7 +11,9 @@ class ASTNode:
     def __repr__(self, level=0, is_last=True):
         indent = "    " * level
         prefix = indent + ("└── " if is_last else "├── ")
-        ret = f"{prefix}{self.type}: {self.value if self.value else ''}\n"
+        # Check if value is explicitly None (not just falsy)
+        value_str = str(self.value) if self.value is not None else ""
+        ret = f"{prefix}{self.type}: {value_str}\n"
 
         for i, child in enumerate(self.children):
             ret += child.__repr__(level + 1, is_last=(i == len(self.children) - 1))
@@ -18,6 +22,8 @@ class ASTNode:
 #######################################
 #               ERRORS                #
 #######################################
+
+# error handler
 
 class ParserError(Exception):
     def __init__(self, pos_start, pos_end, error_name, details):
@@ -45,6 +51,8 @@ class UnexpectedTokenError(ParserError):
 #               PARSER                #
 #######################################
 
+
+# main parser class
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -56,6 +64,7 @@ class Parser:
         self.pos += 1
         self.current_token = self.tokens[self.pos] if self.pos < len(self.tokens) else None
 
+    #Starts parsing and returns the AST.
     def parse(self):
         if not self.tokens:
             raise ParserError(None, None, "No Tokens", "No tokens provided for parsing.")
@@ -70,22 +79,36 @@ class Parser:
 
     def program(self):
         statements = []
-        while self.current_token is not None:
+        while self.current_token is not None and self.current_token.type != 'EOF':
             statements.append(self.statement())
         return ASTNode(type_="Program", children=statements)
 
+    #calls everything
     def statement(self):
         if self.current_token.type == 'DATA_TYPE':
             return self.declaration()
         elif self.current_token.type == 'KEYWORD':
-            if self.current_token.value in ('if', 'while', 'for'):
-                return self.control_structure()
-            elif self.current_token.value in ('print', 'println'):
-                return self.output_statement()
+            keyword = self.current_token.value
+            if keyword in ('while', 'for', 'repeat'):
+                return self.parse_iterative_statement()
+            elif keyword == 'if':
+                return self.parse_conditional_statement()
+            else:
+                raise UnexpectedTokenError(
+                    self.current_token.pos_start,
+                    self.current_token.pos_end,
+                    f"Unexpected keyword: {keyword}"
+                )
         elif self.current_token.type == 'IDENTIFIER':
             return self.assignment_or_function_call()
         else:
             return self.expr()
+
+
+
+    # --------------------------
+    # Declaration Statements    
+    # --------------------------
 
     def declaration(self):
         data_type = self.current_token
@@ -100,6 +123,7 @@ class Parser:
         
         return ASTNode(type_="VariableDeclaration", value=identifier.value)
 
+    # printing stuff
     def output_statement(self):
         keyword = self.current_token
         self.advance()
@@ -114,24 +138,174 @@ class Parser:
         self.advance()
         return ASTNode(type_="OutputStatement", value=keyword.value, children=expressions)
 
-    def control_structure(self):
-        keyword = self.current_token
-        self.advance()
-        if keyword.value == 'if':
-            condition = self.expr()
-            body = self.block()
-            return ASTNode(type_="IfStatement", children=[condition, body])
-        elif keyword.value == 'while':
-            condition = self.expr()
-            body = self.block()
-            return ASTNode(type_="WhileStatement", children=[condition, body])
-        elif keyword.value == 'for':
+    #---------------------------
+    # ITERATIVE STATEMENT BLOCK 
+    #---------------------------
+    def parse_iterative_statement(self):
+        keyword = self.current_token.value
+        self.advance()  # Consume the keyword
+
+        if keyword == 'while':
+            return self.parse_while_loop()
+        elif keyword == 'for':
+            return self.parse_for_loop()
+        elif keyword == 'repeat':
+            return self.parse_repeat_loop()
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start,
+                self.current_token.pos_end,
+                f"Unsupported loop keyword: {keyword}"
+            )
+
+        # --------------------------
+        # While Loop
+        # --------------------------
+    def parse_while_loop(self):
+        self.expect('L_PARENTHESIS', "Expected '(' after 'while'")
+        condition = self.expr()
+        self.expect('R_PARENTHESIS', "Expected ')' after condition")
+        body = self.block()
+        return ASTNode(type_="WhileLoop", children=[condition, body])
+
+        # --------------------------
+        # For Loop (Supports Nested Loops)
+        # --------------------------
+    def parse_for_loop(self):
+        self.expect('L_PARENTHESIS', "Expected '(' after 'for'")
+        
+        # Parse initializer (declaration or assignment)
+        if self.current_token.type == 'DATA_TYPE':
+            initializer = self.declaration()
+        else:
+            initializer = self.assignment_or_function_call()
+        
+        self.expect('SEMICOLON', "Expected ';' after initializer")
+        condition = self.expr()
+        self.expect('SEMICOLON', "Expected ';' after condition")
+        update = self.parse_update_expression()
+        self.expect('R_PARENTHESIS', "Expected ')' after for clauses")
+        body = self.block()
+        
+        return ASTNode(type_="ForLoop", children=[initializer, condition, update, body])
+
+    def parse_update_expression(self):
+        identifier = self.expect('IDENTIFIER', "Expected identifier in update expression").value
+        
+        # Handle increment/decrement operators (e.g., i++, j--)
+        if self.current_token.type in ('INCREMENT_UNARY_OP', 'DECREMENT_UNARY_OP'):
+            op = self.current_token.value
             self.advance()
-            initializer = self.statement()
-            condition = self.expr()
-            update = self.statement()
-            body = self.block()
-            return ASTNode(type_="ForStatement", children=[initializer, condition, update, body])
+            return ASTNode(type_="Update", value=op, children=[ASTNode(type_="Identifier", value=identifier)])
+        
+        # Handle compound assignments (e.g., i += 1)
+        elif self.current_token.type in ('ADD_ASSIGN_OP', 'SUBT_ASSIGN_OP', 'MULTIPLY_ASSIGN_OP', 'DIV_ASSIGN_OP', 'MOD_ASSIGN_OP'):
+            op = self.current_token.value
+            self.advance()
+            value = self.expr()
+            return ASTNode(type_="Assignment", value=op, children=[
+                ASTNode(type_="Identifier", value=identifier),
+                value
+            ])
+        
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start,
+                self.current_token.pos_end,
+                f"Expected increment/decrement or assignment operator, got {self.current_token.type}"
+            )
+
+        # --------------------------
+        # Repeat Loop (Custom Grammar)
+        # --------------------------
+    def parse_repeat_loop(self):
+        times = self.expr()  # e.g., "3" in "repeat 3 times"
+        
+        # Check for 'times' keyword (specific value)
+        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'times':
+            self.advance()
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start if self.current_token else None,
+                self.current_token.pos_end if self.current_token else None,
+                "Expected 'times' after repeat count"
+            )
+        
+        body = self.block()
+        return ASTNode(type_="RepeatLoop", children=[times, body])
+
+        # --------------------------
+        # Block (Handles Nested Statements)
+        # --------------------------
+    def block(self):
+        self.expect('L_CURLY', "Expected '{' to start block")
+        statements = []
+        while self.current_token.type != 'R_CURLY':
+            statements.append(self.statement())
+            # Consume semicolon if present (optional)
+            if self.current_token and self.current_token.type == 'SEMICOLON':
+                self.advance()
+        self.expect('R_CURLY', "Expected '}' to end block")
+        return ASTNode(type_="Block", children=statements)
+    
+    def expect(self, token_type, error_msg):
+        if self.current_token and self.current_token.type == token_type:
+            token = self.current_token
+            self.advance()
+            return token
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start if self.current_token else None,
+                self.current_token.pos_end if self.current_token else None,
+                error_msg
+            )
+
+    #----------------------------
+    # conditional statement
+    # ----------------------------        
+
+    def parse_conditional_statement(self):
+        self.advance()  # Consume 'if'
+        self.expect('L_PARENTHESIS', "Expected '(' after 'if'")
+        condition = self.parse_condition()  # Modified to use parse_condition()
+        self.expect('R_PARENTHESIS', "Expected ')' after condition")
+        
+        true_block = self.parse_statement_block()
+        
+        false_block = None
+        if self.current_token and self.current_token.type == 'KEYWORD':
+            if self.current_token.value == 'else':
+                self.advance()  # Consume 'else'
+                if self.current_token.value == 'if':
+                    false_block = self.parse_conditional_statement()
+                else:
+                    false_block = self.parse_statement_block()
+        
+        return ASTNode(type_="ConditionalStatement", children=[
+            ASTNode(type_="IfClause", children=[condition, true_block]),
+            false_block
+        ])
+    
+    def parse_statement_block(self):
+        if self.current_token.type == 'L_CURLY':
+            return self.block()
+        else:
+            # Handle single statements without braces
+            stmt = self.statement()
+            return ASTNode(type_="Block", children=[stmt])
+        
+    def parse_condition(self):
+    # Handle complex conditions with logical operators
+        return self.logical_expr()
+
+    def logical_expr(self):
+        left = self.expr()
+        while self.current_token and self.current_token.type == 'LOGICAL_OPERATOR':
+            op = self.current_token
+            self.advance()
+            right = self.expr()
+            left = ASTNode(type_="LogicalOp", value=op.value, children=[left, right])
+        return left
 
     def assignment_or_function_call(self):
         identifier = self.current_token
@@ -139,69 +313,53 @@ class Parser:
         if self.current_token.type == 'ASSIGN_OP':
             self.advance()
             value = self.expr()
-            return ASTNode(type_="Assignment", value=identifier.value, children=[value])
-        elif self.current_token.type == 'L_PARENTHESIS':
-            self.advance()
-            args = []
-            while self.current_token.type != 'R_PARENTHESIS':
-                args.append(self.expr())
-                if self.current_token.type == 'SEPARATING_SYMBOL':
-                    self.advance()
-            self.advance()
-            return ASTNode(type_="FunctionCall", value=identifier.value, children=args)
 
-    def block(self):
-        if self.current_token.type != 'L_CURLY':
-            raise UnexpectedTokenError(self.current_token.pos_start, self.current_token.pos_end, "Expected '{'")
-        self.advance()
-        statements = []
-        while self.current_token.type != 'R_CURLY':
-            statements.append(self.statement())
-        self.advance()
-        return ASTNode(type_="Block", children=statements)
+        return ASTNode(type_="Assignment", value=identifier.value, children=[value])
 
+    #----------------------
+    # EXPRESSION STUFFSS
+    #-----------------------
+
+    # parses an expression Handles addition/subtraction (+, -).
     def expr(self):
-        """Parse an expression."""
+        relational_ops = [
+            'LESS_THAN', 'GREATER_THAN', 'LESS_THAN_OR_EQUAL_TO',
+            'GREATER_THAN_OR_EQUAL_TO', 'EQUAL_TO', 'NOT_EQUAL_TO'
+        ]
         left = self.term()
-        while self.current_token is not None and self.current_token.type in ('ADD_OPERATOR', 'SUBTRACT_OPERATOR'):
+        while self.current_token and (
+            self.current_token.type in ['ARITHMETIC_OPERATOR'] + relational_ops or
+            (self.current_token.type == 'LOGICAL_OPERATOR' and 
+            self.current_token.value in ['&&', '||'])
+        ):
             op = self.current_token
             self.advance()
             right = self.term()
-            left = ASTNode(
-                type_="Expression",
-                children=[
-                    left,
-                    ASTNode(type_="Operator", value=op.value),
-                    right
-                ]
-            )
+            left = ASTNode(type_="BinaryOp", value=op.value, children=[left, right])
         return left
 
+    # parses a term Handles multiplication/division/modulo (*, /, %).
     def term(self):
-        """Parse a term."""
+        """Parse terms (*, /, %)."""
         left = self.factor()
-        while self.current_token is not None and self.current_token.type in ('MULTIPLY_OP', 'DIVIDE_OP', 'MODULO_OP'):
+        while self.current_token and (
+            self.current_token.type == 'ARITHMETIC_OPERATOR' and 
+            self.current_token.value in ('*', '/', '%')
+        ):
             op = self.current_token
             self.advance()
             right = self.factor()
-            left = ASTNode(
-                type_="Term",
-                children=[
-                    left,
-                    ASTNode(type_="Operator", value=op.value),
-                    right
-                ]
-            )
+            left = ASTNode(type_="BinaryOp", value=op.value, children=[left, right])
         return left
 
+    # Handles literals, unary operators (-x), and parentheses.
     def factor(self):
-        """Parse a factor."""
-        if self.current_token is None:
-            raise UnexpectedTokenError(
-                pos_start=self.tokens[self.pos - 1].pos_start if self.pos > 0 else None,
-                pos_end=self.tokens[self.pos - 1].pos_end if self.pos > 0 else None,
-                details="Unexpected end of input; expected a number, parenthesis, or unary operator."
-            )
+        # Add logical NOT handling
+        if self.current_token and self.current_token.type == 'LOGICAL_OPERATOR' and self.current_token.value == '!':
+            op = self.current_token
+            self.advance()
+            node = self.factor()
+            return ASTNode(type_="UnaryLogicalOp", value=op.value, children=[node])
 
         token = self.current_token
 
@@ -231,6 +389,12 @@ class Parser:
             self.advance()
             return ASTNode(type_="Parenthesized Expression", children=[node])
 
+        # Add this block to handle identifiers (e.g., variables like "i")
+        if token.type == 'IDENTIFIER':
+            identifier = token.value
+            self.advance()
+            return ASTNode(type_="Identifier", value=identifier)
+
         raise UnexpectedTokenError(
             pos_start=token.pos_start if token else None,
             pos_end=token.pos_end if token else None,
@@ -240,6 +404,8 @@ class Parser:
 #######################################
 #                RUN                  #
 #######################################
+
+#handles the thingy to run this main
 
 from prettytable import PrettyTable
 

@@ -14,7 +14,7 @@ KEYWORDS = [
     'for', 'each', 'import', 'implements', 'switch', 'throw', 'throws',
     'this', 'public', 'protected', 'private', 'new', 'package', 'break',
     'repeat', 'def', 'print', 'println', 'input', 'continue', 'default', 'const',
-    'extends', 'finally', 'static', 'class'
+    'extends', 'finally', 'static', 'class', 'times'
 ]
 RESERVED_WORDS = [
     'fetch', 'areaOf', 'circle', 'cubic', 'distance', 'ft', 'in', 'kg', 'km',
