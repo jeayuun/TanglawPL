@@ -1,16 +1,37 @@
 --------------- Input ---------------
-int  x == 2;
+for (int i = 1; i <= 5; i++) {
+println("Number: {i} ");
+}
 
 ----------- Tokens Table ------------
-+--------+---------------------+
-| Lexeme | Token Specification |
-+--------+---------------------+
-|  int   |      DATA_TYPE      |
-|   x    |      IDENTIFIER     |
-|   ==   |       EQUAL_TO      |
-|   2    |       INTEGER       |
-|   ;    |      SEMICOLON      |
-+--------+---------------------+
++----------+-----------------------+
+|  Lexeme  |  Token Specification  |
++----------+-----------------------+
+|   for    |        KEYWORD        |
+|    (     |     L_PARENTHESIS     |
+|   int    |       DATA_TYPE       |
+|    i     |       IDENTIFIER      |
+|    =     |       ASSIGN_OP       |
+|    1     |        INTEGER        |
+|    ;     |       SEMICOLON       |
+|    i     |       IDENTIFIER      |
+|    <=    | LESS_THAN_OR_EQUAL_TO |
+|    5     |        INTEGER        |
+|    ;     |       SEMICOLON       |
+|    i     |       IDENTIFIER      |
+|    ++    |   INCREMENT_UNARY_OP  |
+|    )     |     R_PARENTHESIS     |
+|    {     |        L_CURLY        |
+| println  |        KEYWORD        |
+|    (     |     L_PARENTHESIS     |
+| Number:  |     STRING_LITERAL    |
+|    {     |      PARENTHESIS      |
+|    i     |       IDENTIFIER      |
+|    }     |      PARENTHESIS      |
+|    )     |     R_PARENTHESIS     |
+|    ;     |       SEMICOLON       |
+|    }     |        R_CURLY        |
++----------+-----------------------+
 
 ----------- Errors Table ------------
 No errors found.

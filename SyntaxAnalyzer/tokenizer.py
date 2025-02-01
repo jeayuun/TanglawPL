@@ -208,7 +208,10 @@ class Lexer:
                 self.advance()
                 errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, errors
+            # Add EOF token at end of input
+        tokens.append(Token('EOF', pos_start=self.pos, pos_end=self.pos))
+        return tokens, []
+        #return tokens, errors
 
     def match_constant(self):
         """Matches predefined constants."""
