@@ -1,37 +1,41 @@
 --------------- Input ---------------
 for (int i = 1; i <= 5; i++) {
-println("Number: {i} ");
+print("hello");
+
+println('test");
 }
 
 ----------- Tokens Table ------------
-+----------+-----------------------+
-|  Lexeme  |  Token Specification  |
-+----------+-----------------------+
-|   for    |        KEYWORD        |
-|    (     |     L_PARENTHESIS     |
-|   int    |       DATA_TYPE       |
-|    i     |       IDENTIFIER      |
-|    =     |       ASSIGN_OP       |
-|    1     |        INTEGER        |
-|    ;     |       SEMICOLON       |
-|    i     |       IDENTIFIER      |
-|    <=    | LESS_THAN_OR_EQUAL_TO |
-|    5     |        INTEGER        |
-|    ;     |       SEMICOLON       |
-|    i     |       IDENTIFIER      |
-|    ++    |   INCREMENT_UNARY_OP  |
-|    )     |     R_PARENTHESIS     |
-|    {     |        L_CURLY        |
-| println  |        KEYWORD        |
-|    (     |     L_PARENTHESIS     |
-| Number:  |     STRING_LITERAL    |
-|    {     |      PARENTHESIS      |
-|    i     |       IDENTIFIER      |
-|    }     |      PARENTHESIS      |
-|    )     |     R_PARENTHESIS     |
-|    ;     |       SEMICOLON       |
-|    }     |        R_CURLY        |
-+----------+-----------------------+
++---------+-----------------------+
+|  Lexeme |  Token Specification  |
++---------+-----------------------+
+|   for   |        KEYWORD        |
+|    (    |     L_PARENTHESIS     |
+|   int   |       DATA_TYPE       |
+|    i    |       IDENTIFIER      |
+|    =    |       ASSIGN_OP       |
+|    1    |        INTEGER        |
+|    ;    |       SEMICOLON       |
+|    i    |       IDENTIFIER      |
+|    <=   | LESS_THAN_OR_EQUAL_TO |
+|    5    |        INTEGER        |
+|    ;    |       SEMICOLON       |
+|    i    |       IDENTIFIER      |
+|    ++   |   INCREMENT_UNARY_OP  |
+|    )    |     R_PARENTHESIS     |
+|    {    |        L_CURLY        |
+|  print  |        KEYWORD        |
+|    (    |     L_PARENTHESIS     |
+|  hello  |     STRING_LITERAL    |
+|    )    |     R_PARENTHESIS     |
+|    ;    |       SEMICOLON       |
+| println |        KEYWORD        |
+|    (    |     L_PARENTHESIS     |
++---------+-----------------------+
 
 ----------- Errors Table ------------
-No errors found.
++-------------------+------------------------------------------------------------------+------------------+
+|     Error Type    |                             Details                              |     Location     |
++-------------------+------------------------------------------------------------------+------------------+
+| Illegal Character | 'Unclosed character literal starting with 'te'.' is not allowed. | Line 4, Column 9 |
++-------------------+------------------------------------------------------------------+------------------+
