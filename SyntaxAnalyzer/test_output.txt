@@ -1,20 +1,58 @@
 --------------- Input ---------------
-print("this is the identifier{ident}");
-
+int mynumber;
+println("Enter a number: ");
+mynumber = input();
+println("The number is {mynumber}");
+double converted_num(m) = mynumber (cm);
+println("The converted number is {converted_num}.");
 
 ----------- Tokens Table ------------
-+------------------------+---------------------+
-|         Lexeme         | Token Specification |
-+------------------------+---------------------+
-|         print          |       KEYWORD       |
-|           (            |    L_PARENTHESIS    |
-| this is the identifier |    STRING_LITERAL   |
-|           {            |      R_REPFIELD     |
-|         ident          |      IDENTIFIER     |
-|           }            |      L_REPFIELD     |
-|           );           |    STRING_LITERAL   |
-|                        |                     |
-+------------------------+---------------------+
++--------------------------+---------------------+
+|          Lexeme          | Token Specification |
++--------------------------+---------------------+
+|           int            |      DATA_TYPE      |
+|         mynumber         |      IDENTIFIER     |
+|            ;             |      SEMICOLON      |
+|         println          |       KEYWORD       |
+|            (             |    L_PARENTHESIS    |
+|     Enter a number:      |    STRING_LITERAL   |
+|            )             |    R_PARENTHESIS    |
+|            ;             |      SEMICOLON      |
+|         mynumber         |      IDENTIFIER     |
+|            =             |      ASSIGN_OP      |
+|          input           |       KEYWORD       |
+|            (             |    L_PARENTHESIS    |
+|            )             |    R_PARENTHESIS    |
+|            ;             |      SEMICOLON      |
+|         println          |       KEYWORD       |
+|            (             |    L_PARENTHESIS    |
+|      The number is       |    STRING_LITERAL   |
+|            {             |      L_REPFIELD     |
+|         mynumber         |      IDENTIFIER     |
+|            }             |      R_REPFIELD     |
+|            )             |    R_PARENTHESIS    |
+|            ;             |      SEMICOLON      |
+|          double          |      DATA_TYPE      |
+|      converted_num       |      IDENTIFIER     |
+|            (             |    L_PARENTHESIS    |
+|            m             |    RESERVED_WORD    |
+|            )             |    R_PARENTHESIS    |
+|            =             |      ASSIGN_OP      |
+|         mynumber         |      IDENTIFIER     |
+|            (             |    L_PARENTHESIS    |
+|            cm            |    RESERVED_WORD    |
+|            )             |    R_PARENTHESIS    |
+|            ;             |      SEMICOLON      |
+|         println          |       KEYWORD       |
+|            (             |    L_PARENTHESIS    |
+| The converted number is  |    STRING_LITERAL   |
+|            {             |      L_REPFIELD     |
+|      converted_num       |      IDENTIFIER     |
+|            }             |      R_REPFIELD     |
+|            .             |    STRING_LITERAL   |
+|            )             |    R_PARENTHESIS    |
+|            ;             |      SEMICOLON      |
++--------------------------+---------------------+
 
 ----------- Errors Table ------------
 No errors found.

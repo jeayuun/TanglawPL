@@ -39,6 +39,20 @@ class UnexpectedTokenError(ParserError):
     def __init__(self, pos_start, pos_end, details="Unexpected token"):
         super().__init__(pos_start, pos_end, "Unexpected Token", details)
 
+class ReplacementFieldNode(ASTNode):
+    def __init__(self, identifier):
+        super().__init__(type_="ReplacementField", value=identifier)
+
+class LiteralNode(ASTNode):
+    def __init__(self, value):
+        super().__init__(type_="Literal", value=value)
+
+class OutputStatementNode(ASTNode):
+    def __init__(self, parts):
+        super().__init__(type_="OutputStatement", children=parts)
+        self.parts = parts  # Redundant but kept for clarity
+    
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -176,59 +190,84 @@ class Parser:
         return unit
     
     def output_statement(self):
-        """
-        Parses an output statement: println("Text {identifier}");
-        Handles replacement fields inside strings.
-        """
-        self.consume("KEYWORD", "println")  # Expecting println keyword
-        self.consume("L_PARENTHESIS")       # Expecting '('
+    # Check for 'println' or 'print' keyword
+        if not (self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value in ('println', 'print')):
+            raise UnexpectedTokenError(
+                self.current_token.pos_start if self.current_token else None,
+                self.current_token.pos_end if self.current_token else None,
+                "Expected 'println' or 'print' keyword"
+            )
+        keyword = self.current_token.value
+        self.advance()  # Consume the keyword
 
-        # Check for a string literal
-        if self.match("STRING_LITERAL"):
-            raw_string = self.previous().value  # Get the actual string value
-            parts = self.process_string_with_replacements(raw_string)
+        self.expect('L_PARENTHESIS', "Expected '(' after output keyword")
 
-            # Build the AST node
-            output_node = OutputStatementNode(parts)
+        parts = []  # This will hold the literal and replacement nodes
 
-        else:
-            raise SyntaxError("Expected a string literal in println().")
+        # Expect a string literal first
+        if self.current_token.type != 'STRING_LITERAL':
+            raise UnexpectedTokenError(
+                self.current_token.pos_start,
+                self.current_token.pos_end,
+                "Expected string literal in output statement"
+            )
+        # Create a literal node from the string literal token.
+        literal_value = self.current_token.value
+        parts.append(LiteralNode(literal_value))
+        self.advance()  # Consume the STRING_LITERAL
 
-        self.consume("R_PARENTHESIS")  # Expecting ')'
-        self.consume("SEMICOLON")      # Expecting ';'
-        return output_node
+        # Now check for any replacement field tokens that might follow.
+        # Our lexer produces L_REPFIELD, then an IDENTIFIER, then R_REPFIELD.
+        while self.current_token and self.current_token.type == 'L_REPFIELD':
+            self.advance()  # Consume the '{'
+            if self.current_token.type != 'IDENTIFIER':
+                raise UnexpectedTokenError(
+                    self.current_token.pos_start,
+                    self.current_token.pos_end,
+                    "Expected identifier after '{' in interpolation"
+                )
+            identifier_value = self.current_token.value
+            self.advance()  # Consume the identifier
+
+            self.expect('R_REPFIELD', "Expected '}' after replacement field")
+
+            # Create a replacement field node
+            parts.append(ReplacementFieldNode(identifier_value))
+
+            # Optionally, if your language allows literal text after a replacement field,
+            # you might check if the next token is a STRING_LITERAL and add it as another literal node.
+            # For example:
+            if self.current_token and self.current_token.type == 'STRING_LITERAL':
+                parts.append(LiteralNode(self.current_token.value))
+                self.advance()
+
+        # Now we expect the closing parenthesis.
+        self.expect('R_PARENTHESIS', "Expected ')' after string literal/interpolation")
+        self.expect('SEMICOLON', "Expected ';' after output statement")
+
+        return OutputStatementNode(parts)
     
     def process_string_with_replacements(self, raw_string):
-        """
-        Processes a string containing {identifier} and splits it into:
-        - Literal Nodes for plain text.
-        - Replacement Field Nodes for {identifier}.
-        """
         import re
-        pattern = r'\{([a-zA-Z_][a-zA-Z0-9_]*)\}'  # Matches {identifier}
-
+        pattern = r'\{([a-zA-Z_][a-zA-Z0-9_]*)\}'
         parts = []
-        last_index = 0
+        last_idx = 0
 
         for match in re.finditer(pattern, raw_string):
             start, end = match.span()
+            literal_part = raw_string[last_idx:start]
+            if literal_part:
+                parts.append(LiteralNode(literal_part))
             identifier = match.group(1)
-
-            # Add preceding text as a Literal Node
-            if start > last_index:
-                parts.append(LiteralNode(raw_string[last_index:start]))
-
-            # Add identifier as a Replacement Field Node
             parts.append(ReplacementFieldNode(identifier))
+            last_idx = end
 
-            last_index = end
-
-        # Add any remaining text after the last match
-        if last_index < len(raw_string):
-            parts.append(LiteralNode(raw_string[last_index:]))
+        # Add remaining literal part
+        if last_idx < len(raw_string):
+            parts.append(LiteralNode(raw_string[last_idx:]))
 
         return parts
-
+        
     def input_statement(self):
         self.advance()
         self.expect('L_PARENTHESIS', "Expected '('")
@@ -714,27 +753,9 @@ class Parser:
         # If we match the expected token, advance to the next one
         self.next_token()
 
-        
-class ReplacementFieldNode(ASTNode):
-    def __init__(self, identifier):
-        self.identifier = identifier
-
-    def __repr__(self):
-        return f"ReplacementField({self.identifier})"
-        
-class OutputStatementNode(ASTNode):
-    def __init__(self, parts):
-            self.parts = parts  # A mix of LiteralNode and ReplacementFieldNode
-
-    def __repr__(self):
-            return f"OutputStatement({self.parts})"
-
-class LiteralNode(ASTNode):
-    def __init__(self, value):
-        self.value = value  # The string value of the literal
-
-    def __repr__(self):
-        return f"Literal({self.value})"
+    def next_token(self):
+        """Advances to the next token."""
+        self.current_token = self.tokenizer.get_next_token()
 
 
 from prettytable import PrettyTable
