@@ -92,7 +92,7 @@ class Parser:
                 return self.parse_iterative_statement()
             elif keyword == 'if':
                 return self.parse_conditional_statement()
-            elif keyword == 'print':
+            elif keyword in ('print', 'println'):
                 return self.output_statement()
             elif keyword == 'input':
                 return self.input_statement()
@@ -106,20 +106,33 @@ class Parser:
             return self.assignment_or_function_call()
         else:
             return self.expr()
+        
 
-    def declaration(self, expect_semicolon=True):  # Add optional parameter
+    def declaration(self, expect_semicolon=True):
+        # First token is the data type
         data_type = self.current_token.value
         self.advance()
-
         declarators = []
         while True:
-            identifier = self.expect('IDENTIFIER', "Expected variable name").value
+            # Expect a variable name (identifier)
+            identifier_token = self.expect('IDENTIFIER', "Expected variable name")
+            identifier_value = identifier_token.value
+
+            # NEW: Check for a unit specifier immediately after the identifier.
+            unit = None
+            if self.current_token and self.current_token.type == 'L_PARENTHESIS':
+                unit = self.parse_unit_specifier()
+
             initializer = None
             if self.current_token and self.current_token.type == 'ASSIGN_OP':
                 self.advance()
                 initializer = self.expr()
 
-            declarator_node = ASTNode(type_="Declarator", value=identifier)
+            # Create a Declarator node.
+            declarator_node = ASTNode(type_="Declarator", value=identifier_value)
+            if unit:
+                # Add a UnitSpecifier as the first child.
+                declarator_node.children.append(ASTNode(type_="UnitSpecifier", value=unit))
             if initializer:
                 declarator_node.children.append(initializer)
             declarators.append(declarator_node)
@@ -129,21 +142,92 @@ class Parser:
             else:
                 break
 
-        if expect_semicolon:  # Only expect semicolon if flagged
+        if expect_semicolon:
             self.expect('SEMICOLON', "Expected ';' after declaration")
         return ASTNode(type_="VariableDeclaration", value=data_type, children=declarators)
 
-    def output_statement(self):
-        keyword = self.current_token
+
+    def parse_unit_specifier(self):
+        """
+        This method is called when the parser has just seen an L_PARENTHESIS after an identifier.
+        It now handles the case where the lexer returns a unit token that already includes a trailing
+        right parenthesis AND then an extra R_PARENTHESIS token.
+        """
+        # Consume the '(' token (caller already checked for it).
         self.advance()
-        self.expect('L_PARENTHESIS', "Expected '('")
-        expressions = []
-        while self.current_token.type != 'R_PARENTHESIS':
-            expressions.append(self.expr())
-            if self.current_token.type == 'SEPARATING_SYMBOL':
+        if self.current_token is None:
+            raise UnexpectedTokenError(None, None, "Unexpected end of input while parsing unit specifier")
+        
+        # Get the unit token.
+        unit_token_value = self.current_token.value
+        if unit_token_value.endswith(")"):
+            # If the unit token ends with ")", strip it.
+            unit = unit_token_value[:-1]
+            self.advance()  # Consume the token with the trailing ")"
+            # If the very next token is an extra R_PARENTHESIS, consume it.
+            if self.current_token and self.current_token.type == 'R_PARENTHESIS':
                 self.advance()
-        self.advance()
-        return ASTNode(type_="OutputStatement", value=keyword.value, children=expressions)
+        else:
+            # Otherwise, take the token as the unit.
+            unit = unit_token_value
+            self.advance()  # Consume the unit token.
+            # Now expect an explicit right parenthesis.
+            self.expect('R_PARENTHESIS', "Expected ')' after unit specifier")
+        return unit
+    
+    def output_statement(self):
+        """
+        Parses an output statement: println("Text {identifier}");
+        Handles replacement fields inside strings.
+        """
+        self.consume("KEYWORD", "println")  # Expecting println keyword
+        self.consume("L_PARENTHESIS")       # Expecting '('
+
+        # Check for a string literal
+        if self.match("STRING_LITERAL"):
+            raw_string = self.previous().value  # Get the actual string value
+            parts = self.process_string_with_replacements(raw_string)
+
+            # Build the AST node
+            output_node = OutputStatementNode(parts)
+
+        else:
+            raise SyntaxError("Expected a string literal in println().")
+
+        self.consume("R_PARENTHESIS")  # Expecting ')'
+        self.consume("SEMICOLON")      # Expecting ';'
+        return output_node
+    
+    def process_string_with_replacements(self, raw_string):
+        """
+        Processes a string containing {identifier} and splits it into:
+        - Literal Nodes for plain text.
+        - Replacement Field Nodes for {identifier}.
+        """
+        import re
+        pattern = r'\{([a-zA-Z_][a-zA-Z0-9_]*)\}'  # Matches {identifier}
+
+        parts = []
+        last_index = 0
+
+        for match in re.finditer(pattern, raw_string):
+            start, end = match.span()
+            identifier = match.group(1)
+
+            # Add preceding text as a Literal Node
+            if start > last_index:
+                parts.append(LiteralNode(raw_string[last_index:start]))
+
+            # Add identifier as a Replacement Field Node
+            parts.append(ReplacementFieldNode(identifier))
+
+            last_index = end
+
+        # Add any remaining text after the last match
+        if last_index < len(raw_string):
+            parts.append(LiteralNode(raw_string[last_index:]))
+
+        return parts
 
     def input_statement(self):
         self.advance()
@@ -285,36 +369,70 @@ class Parser:
         return left
 
     def assignment_or_function_call(self):
-        identifier = self.expect('IDENTIFIER', "Expected identifier")
+        identifier = self.parse_member_access()  # Get member access chain
 
+        # Check if this is a function call after member access
         if self.current_token and self.current_token.type == 'L_PARENTHESIS':
             return self.parse_function_call(identifier)
 
+        # Handle assignment if needed
         if self.current_token and self.current_token.type == 'ASSIGN_OP':
             self.advance()
             value = self.expr()
             self.expect('SEMICOLON', "Expected ';' after assignment")
             return ASTNode(type_="Assignment", value=identifier.value, children=[value])
 
+        # For simple identifier expressions
         self.expect('SEMICOLON', "Expected ';' after expression")
-        return ASTNode(type_="Identifier", value=identifier.value)
+        return identifier  # Return the member access node directly
 
-    def parse_function_call(self, identifier):
+    def parse_member_access(self):
+        # Accept tokens if type is IDENTIFIER, KEYWORD, or RESERVED_WORD.
+        if self.current_token.type in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
+            token = self.current_token
+            self.advance()
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start if self.current_token else None,
+                self.current_token.pos_end if self.current_token else None,
+                "Expected identifier"
+            )
+        current_node = ASTNode(type_="Identifier", value=token.value)
+        while self.current_token and self.current_token.type == 'ACCESSOR_SYMBOL':
+            self.advance()  # Consume the '.' token
+            if self.current_token.type not in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
+                raise UnexpectedTokenError(
+                    self.current_token.pos_start if self.current_token else None,
+                    self.current_token.pos_end if self.current_token else None,
+                    "Expected identifier after '.'"
+                )
+            member = self.current_token
+            self.advance()
+            current_node = ASTNode(
+                type_="MemberAccess",
+                value=member.value,
+                children=[current_node]
+            )
+        return current_node
+
+    def parse_function_call(self, identifier_node):
         self.expect('L_PARENTHESIS', "Expected '(' after function name")
         
         arguments = []
         if self.current_token.type != 'R_PARENTHESIS':
             while True:
                 arguments.append(self.expr())
-                if self.current_token.type == 'SEPARATING_SYMBOL':
-                    self.advance()
-                else:
+                if self.current_token.type != 'SEPARATING_SYMBOL':
                     break
+                self.advance()
 
         self.expect('R_PARENTHESIS', "Expected ')' after function arguments")
-        self.expect('SEMICOLON', "Expected ';' after function call")
         
-        return ASTNode(type_="FunctionCall", value=identifier.value, children=arguments) # last change yung function
+        # Remove semicolon expectation here, let caller handle it
+        return ASTNode(
+            type_="FunctionCall",
+            children=[identifier_node] + arguments
+        )
 
 
     def expr(self):
@@ -346,7 +464,194 @@ class Parser:
             left = ASTNode(type_="BinaryOp", value=op.value, children=[left, right])
         return left
 
-    def factor(self):
+    def parse_geometric_calculation(self, calculation_type):
+        # Expect a dot and a shape identifier
+        self.expect('ACCESSOR_SYMBOL', f"Expected '.' after '{calculation_type}'")
+        
+        # Allow RESERVED_WORD tokens as shape identifiers
+        if self.current_token.type in ('IDENTIFIER', 'RESERVED_WORD'):
+            shape = self.current_token.value
+            self.advance()
+        else:
+            raise UnexpectedTokenError(
+                self.current_token.pos_start,
+                self.current_token.pos_end,
+                f"Expected shape identifier after '{calculation_type}.'"
+            )
+        
+        # Expect parentheses and parameters
+        self.expect('L_PARENTHESIS', "Expected '(' after shape identifier")
+        
+        # Parse parameters
+        parameters = []
+        while self.current_token.type != 'R_PARENTHESIS':
+            parameters.append(self.expr())
+            if self.current_token.type == 'SEPARATING_SYMBOL':
+                self.advance()
+        
+        self.expect('R_PARENTHESIS', "Expected ')' after parameters")
+        
+        # Return an AST node for the calculation
+        return ASTNode(
+            type_=f"{calculation_type.capitalize()}Calculation",
+            value=shape,
+            children=parameters
+        )
+    
+    def parse_shape_expression(self, shape_type):
+        # Expect parentheses and parameters
+        self.expect('L_PARENTHESIS', f"Expected '(' after '{shape_type}'")
+        
+        # Parse parameters
+        parameters = []
+        while self.current_token.type != 'R_PARENTHESIS':
+            parameters.append(self.expr())
+            if self.current_token.type == 'SEPARATING_SYMBOL':
+                self.advance()
+        
+        self.expect('R_PARENTHESIS', "Expected ')' after parameters")
+        
+        # Return an AST node for the shape
+        return ASTNode(
+            type_="Shape",
+            value=shape_type,
+            children=parameters
+        )
+    
+
+    def parse_measurement_expression(self, measurement_type):
+        # NEW: Check if the next token is an L_PARENTHESIS. If not, treat it as a simple identifier.
+        if self.current_token and self.current_token.type != 'L_PARENTHESIS':
+            # Not followed by '('; return as an Identifier node.
+            return ASTNode(type_="Identifier", value=measurement_type)
+        # Otherwise, parse it as a measurement expression.
+        self.expect('L_PARENTHESIS', f"Expected '(' after '{measurement_type}'")
+        parameters = []
+        while self.current_token.type != 'R_PARENTHESIS':
+            parameters.append(self.expr())
+            if self.current_token.type == 'SEPARATING_SYMBOL':
+                self.advance()
+        self.expect('R_PARENTHESIS', "Expected ')' after parameters")
+        return ASTNode(type_="Measurement", value=measurement_type, children=parameters)
+    
+    
+    def parse_unit_expression(self, unit_type):
+        # Expect a value to apply the unit to
+        value = self.expr()
+        
+        # Return an AST node for the unit
+        return ASTNode(
+            type_="Unit",
+            value=unit_type,
+            children=[value]
+        )
+    
+    def parse_fetch_expression(self):
+        # Expect parentheses and parameters
+        self.expect('L_PARENTHESIS', "Expected '(' after 'fetch'")
+        
+        # Parse parameters
+        parameters = []
+        while self.current_token.type != 'R_PARENTHESIS':
+            parameters.append(self.expr())
+            if self.current_token.type == 'SEPARATING_SYMBOL':
+                self.advance()
+        
+        self.expect('R_PARENTHESIS', "Expected ')' after parameters")
+        
+        # Return an AST node for the fetch operation
+        return ASTNode(
+            type_="FetchOperation",
+            children=parameters
+        )
+
+    def parse_setprecision_expression(self):
+        # Expect parentheses and precision value
+        self.expect('L_PARENTHESIS', "Expected '(' after 'setprecision'")
+        precision = self.expr()
+        self.expect('R_PARENTHESIS', "Expected ')' after precision value")
+        
+        # Return an AST node for the setprecision operation
+        return ASTNode(
+            type_="SetPrecision",
+            children=[precision]
+        )
+
+    def parse_cubic_expression(self):
+        # Expect parentheses and parameters
+        self.expect('L_PARENTHESIS', "Expected '(' after 'cubic'")
+        
+        # Parse parameters
+        parameters = []
+        while self.current_token.type != 'R_PARENTHESIS':
+            parameters.append(self.expr())
+            if self.current_token.type == 'SEPARATING_SYMBOL':
+                self.advance()
+        
+        self.expect('R_PARENTHESIS', "Expected ')' after parameters")
+        
+        # Return an AST node for the cubic operation
+        return ASTNode(
+            type_="CubicOperation",
+            children=parameters
+        )
+
+    def factor(self):   
+        token = self.current_token
+
+        # Handle built-in or function call: if an identifier is immediately followed by '('
+        if token.type in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
+            nxt = self.peek()
+            if nxt and nxt.type == 'L_PARENTHESIS':
+                # Create a node for the function name and parse the function call.
+                func_node = ASTNode(type_="Identifier", value=token.value)
+                self.advance()  # consume the function name token
+                return self.parse_function_call(func_node)
+            else:
+                return self.parse_member_access()
+    
+        # Handle reserved words
+        if self.current_token and self.current_token.type == 'RESERVED_WORD':
+            reserved_word = self.current_token.value
+            
+            # Geometric calculations
+            if reserved_word in ('areaOf', 'perimeterOf', 'volumeOf'):
+                self.advance()  # Consume the reserved word
+                return self.parse_geometric_calculation(reserved_word)
+            
+            # Shapes
+            elif reserved_word in ('circle', 'rectangle', 'square', 'triangle', 'sphere'):
+                self.advance()  # Consume the reserved word
+                return self.parse_shape_expression(reserved_word)
+            
+            # Measurements
+            elif reserved_word in ('radius', 'height', 'width', 'length', 'side', 'distance', 'circumference'):
+                self.advance()  # Consume the reserved word
+                return self.parse_measurement_expression(reserved_word)
+            
+            # Units
+            elif reserved_word in ('cm', 'ft', 'in', 'kg', 'km', 'l', 'lbs', 'm', 'mg', 'mm', 'sq'):
+                self.advance()  # Consume the reserved word
+                return self.parse_unit_expression(reserved_word)
+            
+            # Other operations
+            elif reserved_word == 'fetch':
+                self.advance()  # Consume the reserved word
+                return self.parse_fetch_expression()
+            elif reserved_word == 'setprecision':
+                self.advance()  # Consume the reserved word
+                return self.parse_setprecision_expression()
+            elif reserved_word == 'cubic':
+                self.advance()  # Consume the reserved word
+                return self.parse_cubic_expression()
+            
+            else:
+                raise UnexpectedTokenError(
+                    self.current_token.pos_start,
+                    self.current_token.pos_end,
+                    f"Unsupported reserved word: {reserved_word}"
+                )
+        
         if self.current_token and self.current_token.type == 'LOGICAL_OPERATOR' and self.current_token.value == '!':
             op = self.current_token
             self.advance()
@@ -368,7 +673,6 @@ class Parser:
         if token.type == 'L_PARENTHESIS':
             self.advance()  # Consume '('
             node = self.expr()
-            # Check for closing parenthesis
             if not self.current_token or self.current_token.type != 'R_PARENTHESIS':
                 raise UnexpectedTokenError(
                     pos_start=token.pos_start,
@@ -378,16 +682,60 @@ class Parser:
             self.advance()  # Consume ')'
             return ASTNode(type_="Parenthesized Expression", children=[node])
 
-        if token.type == 'IDENTIFIER':
-            identifier = token.value
-            self.advance()
-            return ASTNode(type_="Identifier", value=identifier)
+        if token.type in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
+            return self.parse_member_access()
 
         raise UnexpectedTokenError(
             pos_start=token.pos_start if token else None,
             pos_end=token.pos_end if token else None,
             details=f"Unexpected token: {token.type}" if token else "Unexpected end of input."
         )
+
+    def peek(self):
+        if self.pos + 1 < len(self.tokens):
+            return self.tokens[self.pos + 1]
+        return None
+    
+    def consume(self, expected_type, expected_value=None):
+        """
+        Consumes the current token if it matches the expected type (and value, if specified).
+        Otherwise, raises an error indicating an unexpected token.
+        """
+        if self.current_token is None:
+            raise SyntaxError("Unexpected end of input")
+        
+        # Change 'self.current_token.token' to 'self.current_token.type' (or the correct attribute name)
+        if self.current_token.type != expected_type:
+            raise SyntaxError(f"Unexpected token: {self.current_token.type}. Expected {expected_type}.")
+        
+        if expected_value and self.current_token.value != expected_value:
+            raise SyntaxError(f"Unexpected token value: {self.current_token.value}. Expected {expected_value}.")
+        
+        # If we match the expected token, advance to the next one
+        self.next_token()
+
+        
+class ReplacementFieldNode(ASTNode):
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    def __repr__(self):
+        return f"ReplacementField({self.identifier})"
+        
+class OutputStatementNode(ASTNode):
+    def __init__(self, parts):
+            self.parts = parts  # A mix of LiteralNode and ReplacementFieldNode
+
+    def __repr__(self):
+            return f"OutputStatement({self.parts})"
+
+class LiteralNode(ASTNode):
+    def __init__(self, value):
+        self.value = value  # The string value of the literal
+
+    def __repr__(self):
+        return f"Literal({self.value})"
+
 
 from prettytable import PrettyTable
 

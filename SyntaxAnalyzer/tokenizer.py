@@ -410,7 +410,7 @@ class Lexer:
                 if str_val: 
                     tokens.append(Token('STRING_LITERAL', str_val))
                     str_val = ''
-                tokens.append(Token('PARENTHESIS', '{'))
+                tokens.append(Token('R_REPFIELD', '{')) #CHANGED AS REPFIELD
                 self.advance()  
                 embedded_val = ''
                 while self.current_char is not None and self.current_char != '}':
@@ -418,7 +418,7 @@ class Lexer:
                     self.advance()
                 if self.current_char == '}': 
                     tokens.append(Token('IDENTIFIER', embedded_val.strip()))  
-                    tokens.append(Token('PARENTHESIS', '}'))  
+                    tokens.append(Token('L_REPFIELD', '}'))   #CHANGED AS REPFIELD
                     self.advance()
                 else:
                     return UnclosedStringError(pos_start, self.pos, "String literal was not closed.")
