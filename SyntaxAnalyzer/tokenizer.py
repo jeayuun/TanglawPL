@@ -14,7 +14,7 @@ KEYWORDS = [
     'for', 'each', 'import', 'implements', 'switch', 'throw', 'throws',
     'this', 'public', 'protected', 'private', 'new', 'package', 'break',
     'repeat', 'def', 'print', 'println', 'input', 'continue', 'default', 'const',
-    'extends', 'finally', 'static', 'class'
+    'extends', 'finally', 'static', 'class', 'times'
 ]
 RESERVED_WORDS = [
     'fetch', 'areaOf', 'circle', 'cubic', 'distance', 'ft', 'in', 'kg', 'km',
@@ -208,7 +208,10 @@ class Lexer:
                 self.advance()
                 errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, errors
+            # Add EOF token at end of input
+        tokens.append(Token('EOF', pos_start=self.pos, pos_end=self.pos))
+        return tokens, []
+        #return tokens, errors
 
     def match_constant(self):
         """Matches predefined constants."""
@@ -385,46 +388,54 @@ class Lexer:
 
         return tokens, errors
     
+    #modified
     def make_string(self):
         str_val = ''
         pos_start = self.pos.copy()
         tokens = []
-        self.advance()  
+        self.advance()  # Consume opening "
 
-        while self.current_char is not None:
-            if self.current_char == '\\': 
+        while self.current_char is not None and self.current_char != '"':
+            if self.current_char == '\\':
+                # Handle escape characters
                 self.advance()
-                escape_chars = {
-                    'n': '\n', 't': '\t', '"': '"', "'": "'", '\\': '\\'
-                }
-                str_val += escape_chars.get(self.current_char, self.current_char)
-            elif self.current_char == '"':  
-                self.advance()
-                if str_val:  
-                    tokens.append(Token('STRING_LITERAL', str_val))
-                return tokens
-            elif self.current_char == '{': 
-                if str_val: 
-                    tokens.append(Token('STRING_LITERAL', str_val))
-                    str_val = ''
-                tokens.append(Token('PARENTHESIS', '{'))
-                self.advance()  
-                embedded_val = ''
-                while self.current_char is not None and self.current_char != '}':
-                    embedded_val += self.current_char
-                    self.advance()
-                if self.current_char == '}': 
-                    tokens.append(Token('IDENTIFIER', embedded_val.strip()))  
-                    tokens.append(Token('PARENTHESIS', '}'))  
+                if self.current_char in {'n', 't', '"', "'", '\\'}:
+                    escape_map = {'n': '\n', 't': '\t', '"': '"', "'": "'", '\\': '\\'}
+                    str_val += escape_map[self.current_char]
                     self.advance()
                 else:
-                    return UnclosedStringError(pos_start, self.pos, "String literal was not closed.")
+                    str_val += '\\' + self.current_char
+                    self.advance()
+            elif self.current_char == '{':
+                # Handle replacement field
+                if str_val:
+                    tokens.append(Token('STRING_LITERAL', str_val))
+                    str_val = ''
+                tokens.append(Token('L_REPFIELD', '{'))  # Use L_REPFIELD for '{'
+                self.advance()
+                embedded_val = []
+                while self.current_char is not None and self.current_char != '}':
+                    embedded_val.append(self.current_char)
+                    self.advance()
+                if self.current_char == '}':
+                    self.advance()
+                    identifier = ''.join(embedded_val).strip()
+                    tokens.append(Token('IDENTIFIER', identifier))
+                    tokens.append(Token('R_REPFIELD', '}'))  # Use R_REPFIELD for '}'
+                else:
+                    return UnclosedStringError(pos_start, self.pos, "Unclosed replacement field.")
             else:
-                str_val += self.current_char  
-            self.advance()
+                str_val += self.current_char
+                self.advance()
 
-        if str_val:  
-            tokens.append(Token('STRING_LITERAL', str_val))
+        # Consume the closing "
+        if self.current_char == '"':
+            self.advance()
+            if str_val:
+                tokens.append(Token('STRING_LITERAL', str_val))
+        else:
+            return UnclosedStringError(pos_start, self.pos, "Unclosed string literal.")
+
         return tokens
         
 
@@ -689,7 +700,7 @@ class Lexer:
 #                RUN                  #
 #######################################
 
-from prettytable import PrettyTable 
+# from prettytable import PrettyTable 
 
 
 def run(fn, text):
