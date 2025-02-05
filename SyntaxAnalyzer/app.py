@@ -1,4 +1,5 @@
 import tokenizer
+import parser  # Import your parser module
 from pathlib import Path
 from prettytable import PrettyTable
 
@@ -20,9 +21,15 @@ def process_file(filename):
 
         tokens, errors = tokenizer.run(filename, text)
 
+        # Parse tokens and generate AST
+        ast = None
+        if not errors:
+            parser_instance = parser.Parser(tokens)  # Assuming your parser class is named `Parser`
+            ast = parser_instance.parse()  # Generate AST
+
         output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
-        with open(output_filename, 'w') as output_file:
+        with open(output_filename, 'w', encoding='utf-8') as output_file:
             output_file.write("--------------- Input ---------------\n")
             output_file.write(text + "\n\n")
 
@@ -52,6 +59,14 @@ def process_file(filename):
                 output_file.write(error_table.get_string())
             else:
                 output_file.write("No errors found.\n")
+
+            # Add AST Output with proper encoding
+            output_file.write("----------- AST Output ------------\n")
+            if ast:
+                output_file.write(ast.__repr__() + "\n")  # This will print the AST
+                output_file.write("Correct syntax, Output is Valid.\n")
+            else:
+                output_file.write("AST generation failed due to syntax errors.\n")
 
         print(f"\nOutput saved to {output_filename}")
 
