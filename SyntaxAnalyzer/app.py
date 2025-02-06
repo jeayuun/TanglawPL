@@ -1,6 +1,5 @@
-import tokenizer
 from pathlib import Path
-from prettytable import PrettyTable
+import os
 
 def process_file(filename):
     if not filename.endswith('.lit'):
@@ -9,49 +8,16 @@ def process_file(filename):
 
     try:
         downloads_folder = Path.home() / "Downloads"
-        input_filepath = downloads_folder / filename
-
-        if not input_filepath.exists():
-            print(f"\nError: The file '{input_filepath}' does not exist in the Downloads folder.")
-            return
-
-        with open(input_filepath, 'r') as file:
-            text = file.read()
-
-        tokens, errors = tokenizer.run(filename, text)
-
         output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
-        with open(output_filename, 'w') as output_file:
-            output_file.write("--------------- Input ---------------\n")
-            output_file.write(text + "\n\n")
+        if not output_filename.exists():
+            print(f"\nError: The file '{filename}' does not exist in the Downloads folder.")
+            return
 
-            output_file.write("----------- Tokens Table ------------\n")
-            token_table = PrettyTable()
-            token_table.field_names = ["Lexeme", "Token Specification"]
-
-            for token in tokens:
-                if isinstance(token, list): 
-                    for sub_token in token:
-                        token_table.add_row([sub_token.value, sub_token.type])
-                else:
-                    token_table.add_row([token.value, token.type])
-
-            output_file.write(token_table.get_string() + "\n\n")
-
-            output_file.write("----------- Errors Table ------------\n")
-            if errors:
-                error_table = PrettyTable()
-                error_table.field_names = ["Error Type", "Details", "Location"]
-                for error in errors:
-                    error_table.add_row([
-                        error.error_name,
-                        error.details,
-                        f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
-                    ])
-                output_file.write(error_table.get_string())
-            else:
-                output_file.write("No errors found.\n")
+        with open(output_filename, 'r', encoding='utf-8') as file:
+            content = file.read()
+            print("--------------- Output File Contents ---------------")
+            print(content)
 
         print(f"\nOutput saved to {output_filename}")
 
@@ -64,5 +30,5 @@ def process_file(filename):
         print(f"Error: {e}")
 
 if __name__ == '__main__':
-    filename = input("Enter the .lit file name from the Downloads folder: ")
+    filename = input("Enter the .lit file name from the Downloads folder: ").strip()
     process_file(filename)

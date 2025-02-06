@@ -1,0 +1,19 @@
+--------------- Input ---------------
+int num = 'M';
+
+
+----------- Abstract Syntax Tree (AST) ------------
+└── Program
+    ├── VariableDeclaration
+    │   ├── Type: int
+    │   ├── Identifier: num
+    │   ├── Assignment
+    │   │   ├── ErrorNode: Invalid Literal 'M'
+
+
+----------- Errors Table ------------
++--------------------+--------------------------------+-------------------+
+|     Error Type     |             Details            |      Location     |
++--------------------+--------------------------------+-------------------+
+| Invalid Assignment | 'M' is not a valid int literal | Line 1, Column 11 |
++--------------------+--------------------------------+-------------------+

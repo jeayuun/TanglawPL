@@ -1,0 +1,41 @@
+--------------- Input ---------------
+int mynumber;
+println("Enter a number: ");
+mynumber = input();
+println("The number is {mynumber}");
+double converted_num(m) = mynumber (cm);
+println("The converted number is {converted_num}.");
+
+
+----------- Abstract Syntax Tree (AST) ------------
+└── Program
+    ├── VariableDeclaration
+    │   ├── Type: int
+    │   ├── Identifier: mynumber
+    ├── FunctionCall: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "Enter a number: "
+    ├── Assignment
+    │   ├── Identifier: mynumber
+    │   ├── FunctionCall: input
+    ├── FunctionCall: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "The number is "
+    │   │   ├── EmbeddedExpression
+    │   │   │   ├── Identifier: mynumber
+    ├── VariableDeclaration
+    │   ├── Type: double
+    │   ├── Identifier: converted_num
+    │   ├── FunctionCall
+    │   │   ├── Identifier: mynumber
+    │   │   ├── Argument: cm → m (conversion)
+    ├── FunctionCall: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "The converted number is "
+    │   │   ├── EmbeddedExpression
+    │   │   │   ├── Identifier: converted_num
+    │   │   ├── Text: "."
+
+
+----------- Errors Table ------------
+No errors found.

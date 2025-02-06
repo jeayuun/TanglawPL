@@ -1,0 +1,50 @@
+--------------- Input ---------------
+int mynumber;
+println(“Enter a number: ”);
+mynumber = input()
+println("The number is {mynumber}");
+double converted_num(m) = mynumber (cm);;
+printl("The converted number is {converted_num}"); 
+
+
+----------- Abstract Syntax Tree (AST) ------------
+└── Program
+    ├── VariableDeclaration
+    │   ├── Type: int
+    │   ├── Identifier: mynumber
+    ├── FunctionCall: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "Enter a number: "
+    ├── Assignment (ErrorNode)
+    │   ├── Identifier: mynumber
+    │   ├── FunctionCall: input
+    │   ├── Error: Missing Semicolon
+    ├── FunctionCall: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "The number is "
+    │   │   ├── EmbeddedExpression
+    │   │   │   ├── Identifier: mynumber
+    ├── VariableDeclaration
+    │   ├── Type: double
+    │   ├── Identifier: converted_num
+    │   ├── FunctionCall
+    │   │   ├── Identifier: mynumber
+    │   │   ├── Argument: cm → m (conversion)
+    │   ├── Error: Extra Semicolon
+    ├── FunctionCall (ErrorNode)
+    │   ├── Identifier: printl
+    │   ├── StringLiteral
+    │   │   ├── Text: "The converted number is "
+    │   │   ├── EmbeddedExpression
+    │   │   │   ├── Identifier: converted_num
+    │   ├── Error: Undefined Function
+
+
+----------- Errors Table ------------
++----------------------+----------------------------------+-------------------+
+|      Error Type      |             Details              |      Location     |
++----------------------+----------------------------------+-------------------+
+| Missing Semicolon    | Expected ';' after statement     | Line 3, Column 21 |
+| Extra Semicolon      | Unexpected ';' after expression  | Line 5, Column 39 |
+| Undefined Function   | 'printl' is not defined          | Line 6, Column 1  |
++----------------------+----------------------------------+-------------------+

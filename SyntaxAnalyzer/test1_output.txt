@@ -1,0 +1,132 @@
+--------------- Input ---------------
+if(choice == 1) {
+   println("Enter the side length of the square:");
+   side S = input();
+  
+   ASqauare = areaOf.square;
+  
+   println("The area of the square is {ASqauare} square meters.");
+}
+else if(choice == 2) {
+   println("Enter the length of the rectangle:");
+   length L = input();
+  
+   println("Enter the width of the rectangle:");
+   width W = input();
+ 
+   ARectangle = areaOf.Rectangle (L,W);
+  
+   println("The area of the rectangle is {ARectangle} square meters.");
+}
+else if(choice == 3) {
+   println("Enter the base length of the triangle:");
+   base B= input();
+  
+   println("Enter the height of the triangle:");
+   height H= input();
+  
+   ATriangle = areaOf.triangle(H,B);
+  
+   println("The area of the triangle is {ATriangle} square meters.");
+}
+else if(choice == 4) {
+   println("Exiting the program.");
+}
+else {
+   println("Invalid choice. Please select a valid option.");
+}
+
+
+----------- Abstract Syntax Tree (AST) ------------
+└── ConditionalStatement: if
+    ├── Condition
+    │   ├── Identifier: choice
+    │   ├── Operator: ==
+    │   ├── Number: 1
+    ├── Block
+    │   ├── FunctionCall: println
+    │   │   ├── StringLiteral: "Enter the side length of the square:"
+    │   ├── VariableDeclaration
+    │   │   ├── Type: side
+    │   │   ├── Identifier: S
+    │   │   ├── Assignment
+    │   │   │   ├── FunctionCall: input
+    │   ├── Assignment
+    │   │   ├── Identifier: ASquare
+    │   │   ├── MemberAccess
+    │   │   │   ├── Identifier: areaOf
+    │   │   │   ├── Identifier: square
+    │   ├── FunctionCall: println
+    │   │   ├── StringLiteral: "The area of the square is {ASquare} square meters."
+    └── ConditionalStatement: else if
+        ├── Condition
+        │   ├── Identifier: choice
+        │   ├── Operator: ==
+        │   ├── Number: 2
+        ├── Block
+        │   ├── FunctionCall: println
+        │   │   ├── StringLiteral: "Enter the length of the rectangle:"
+        │   ├── VariableDeclaration
+        │   │   ├── Type: length
+        │   │   ├── Identifier: L
+        │   │   ├── Assignment
+        │   │   │   ├── FunctionCall: input
+        │   ├── FunctionCall: println
+        │   │   ├── StringLiteral: "Enter the width of the rectangle:"
+        │   ├── VariableDeclaration
+        │   │   ├── Type: width
+        │   │   ├── Identifier: W
+        │   │   ├── Assignment
+        │   │   │   ├── FunctionCall: input
+        │   ├── Assignment
+        │   │   ├── Identifier: ARectangle
+        │   │   ├── FunctionCall
+        │   │   │   ├── Identifier: areaOf
+        │   │   │   ├── Identifier: Rectangle
+        │   │   │   ├── Arguments: L, W
+        │   ├── FunctionCall: println
+        │   │   ├── StringLiteral: "The area of the rectangle is {ARectangle} square meters."
+        └── ConditionalStatement: else if
+            ├── Condition
+            │   ├── Identifier: choice
+            │   ├── Operator: ==
+            │   ├── Number: 3
+            ├── Block
+            │   ├── FunctionCall: println
+            │   │   ├── StringLiteral: "Enter the base length of the triangle:"
+            │   ├── VariableDeclaration
+            │   │   ├── Type: base
+            │   │   ├── Identifier: B
+            │   │   ├── Assignment
+            │   │   │   ├── FunctionCall: input
+            │   ├── FunctionCall: println
+            │   │   ├── StringLiteral: "Enter the height of the triangle:"
+            │   ├── VariableDeclaration
+            │   │   ├── Type: height
+            │   │   ├── Identifier: H
+            │   │   ├── Assignment
+            │   │   │   ├── FunctionCall: input
+            │   ├── Assignment
+            │   │   ├── Identifier: ATriangle
+            │   │   ├── FunctionCall
+            │   │   │   ├── Identifier: areaOf
+            │   │   │   ├── Identifier: triangle
+            │   │   │   ├── Arguments: H, B
+            │   ├── FunctionCall: println
+            │   │   ├── StringLiteral: "The area of the triangle is {ATriangle} square meters."
+            └── ConditionalStatement: else if
+                ├── Condition
+                │   ├── Identifier: choice
+                │   ├── Operator: ==
+                │   ├── Number: 4
+                ├── Block
+                │   ├── FunctionCall: println
+                │   │   ├── StringLiteral: "Exiting the program."
+                └── ConditionalStatement: else
+                    ├── Block
+                    │   ├── FunctionCall: println
+                    │   │   ├── StringLiteral: "Invalid choice. Please select a valid option."
+
+
+----------- Errors Table ------------
+No errors found.
