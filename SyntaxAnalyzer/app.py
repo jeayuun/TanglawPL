@@ -21,17 +21,11 @@ def process_file(filename):
 
         tokens, errors = tokenizer.run(filename, text)
 
-        # Parse tokens and generate AST
-        ast = None
-        syntax_error = None  # To store syntax error message
+                # Parse tokens and generate AST or capture errors
+        ast_or_error = None
         if not errors:
-            parser_instance = parser.Parser(tokens)  # Assuming your parser class is named `Parser`
-            try:
-                ast = parser_instance.parse()  # Generate AST
-            except parser.ParserError as e:
-                syntax_error = e.as_string()  # Capture syntax error message
-            except Exception as e:
-                syntax_error = str(e)  # Catch unexpected errors
+            parser_instance = parser.Parser(tokens)
+            ast_or_error = parser_instance.parse()  # This now returns either AST or an error message
 
         output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
@@ -52,7 +46,7 @@ def process_file(filename):
 
             output_file.write(token_table.get_string() + "\n\n")
 
-            output_file.write("----------- Errors Table ------------\n")
+            output_file.write("----------- Errors Table (Tokenizer) ------------\n")
             if errors:
                 error_table = PrettyTable()
                 error_table.field_names = ["Error Type", "Details", "Location"]
@@ -62,22 +56,26 @@ def process_file(filename):
                         error.details,
                         f"Line {error.pos_start.ln + 1}, Column {error.pos_start.col + 1}"
                     ])
-                output_file.write(error_table.get_string())
+                output_file.write(error_table.get_string() + "\n\n")
             else:
-                output_file.write("No errors found.\n")
+                output_file.write("No lexical errors found.\n\n")
 
-            # Add AST Output with proper encoding
-            output_file.write("----------- AST Output ------------\n")
-            if ast:
-                output_file.write(ast.__repr__() + "\n")  # This will print the AST
-                output_file.write("Correct syntax, Output is Valid.\n")
-            elif syntax_error:
-                output_file.write("Syntax Error Detected:\n")
-                output_file.write(syntax_error + "\n")
+            output_file.write("----------- Syntax Error ------------\n")
+            if isinstance(ast_or_error, str):  # If a syntax error message was returned
+                output_file.write(ast_or_error + "\n")
             else:
+                output_file.write("No syntax errors found.\n\n")
+
+            # Add AST Output if valid
+            output_file.write("----------- AST Output ------------\n")
+            if isinstance(ast_or_error, str):  # If there was an error, no AST is written
                 output_file.write("AST generation failed due to syntax errors.\n")
-        
+            else:
+                output_file.write(ast_or_error.__repr__() + "\n")
+                output_file.write("Correct syntax, Output is Valid.\n")
+
         print(f"\nOutput saved to {output_filename}")
+
 
     except UnicodeDecodeError as e:
         print(f"Encoding error: {e}")

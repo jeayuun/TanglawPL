@@ -77,19 +77,17 @@ class Parser:
 
     def parse(self):
         if not self.tokens:
-            raise ParserError(None, None, "No Tokens", "No tokens provided for parsing.")
+            return "Syntax Error: No tokens provided for parsing."
+
         try:
             ast = self.program()
             if self.current_token is not None:
-                raise UnexpectedTokenError(
-                    self.current_token.pos_start,
-                    self.current_token.pos_end,
-                    f"Unexpected token: {self.current_token.type}"
-                )
-            return ast
+                return f"Syntax Error: Unexpected token '{self.current_token.type}' at Line {self.current_token.pos_start.ln + 1}, Column {self.current_token.pos_start.col + 1}"
+            return ast  # If no error, return the AST
         except ParserError as e:
-            print(e.as_string())
-            return None
+            return e.as_string()  # Return formatted syntax error
+        except Exception as e:
+            return f"Unexpected Parsing Error: {str(e)}"  # Catch unexpected errors
 
     def program(self):
         statements = []
