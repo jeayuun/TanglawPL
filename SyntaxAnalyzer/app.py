@@ -1,5 +1,6 @@
 import tokenizer
-import parser  # Import your parser module
+from parser import Parser
+import parser
 from pathlib import Path
 from prettytable import PrettyTable
 
@@ -61,12 +62,28 @@ def process_file(filename):
                 output_file.write("No errors found.\n")
 
             # Add AST Output with proper encoding
-            output_file.write("----------- AST Output ------------\n")
+            output_file.write("\n\n----------- AST Output ------------\n")
             if ast:
                 output_file.write(ast.__repr__() + "\n")  # This will print the AST
                 output_file.write("Correct syntax, Output is Valid.\n")
             else:
                 output_file.write("AST generation failed due to syntax errors.\n")
+        
+            #syntax errors
+            output_file.write("\n----------- Syntax Analyzer Errors ------------\n")
+            if parser_instance and parser_instance.syntax_errors:  # Check instance's errors
+                syntax_error_table = PrettyTable()
+                syntax_error_table.field_names = ["Error Type", "Details", "Location"]
+                for error in parser_instance.syntax_errors:
+                    syntax_error_table.add_row([
+                        error["Error Type"],
+                        error["Details"],
+                        error["Location"]
+                    ])
+                output_file.write(syntax_error_table.get_string())
+            else:
+                output_file.write("No syntax analyzer errors found.\n")
+
 
         print(f"\nOutput saved to {output_filename}")
 
