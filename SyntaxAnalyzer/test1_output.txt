@@ -1,4 +1,7 @@
 --------------- Input ---------------
+# without error # 
+
+ 
 if(choice == 1) {
    println("Enter the side length of the square:");
    side S = input();
@@ -29,6 +32,7 @@ else if(choice == 3) {
   
    println("The area of the triangle is {ATriangle} square meters.");
 }
+ 
 else if(choice == 4) {
    println("Exiting the program.");
 }
@@ -37,96 +41,175 @@ else {
 }
 
 
------------ Abstract Syntax Tree (AST) ------------
-└── ConditionalStatement: if
-    ├── Condition
-    │   ├── Identifier: choice
-    │   ├── Operator: ==
-    │   ├── Number: 1
-    ├── Block
-    │   ├── FunctionCall: println
-    │   │   ├── StringLiteral: "Enter the side length of the square:"
-    │   ├── VariableDeclaration
-    │   │   ├── Type: side
-    │   │   ├── Identifier: S
-    │   │   ├── Assignment
-    │   │   │   ├── FunctionCall: input
-    │   ├── Assignment
-    │   │   ├── Identifier: ASquare
-    │   │   ├── MemberAccess
-    │   │   │   ├── Identifier: areaOf
-    │   │   │   ├── Identifier: square
-    │   ├── FunctionCall: println
-    │   │   ├── StringLiteral: "The area of the square is {ASquare} square meters."
-    └── ConditionalStatement: else if
-        ├── Condition
-        │   ├── Identifier: choice
-        │   ├── Operator: ==
-        │   ├── Number: 2
-        ├── Block
-        │   ├── FunctionCall: println
-        │   │   ├── StringLiteral: "Enter the length of the rectangle:"
-        │   ├── VariableDeclaration
-        │   │   ├── Type: length
-        │   │   ├── Identifier: L
-        │   │   ├── Assignment
-        │   │   │   ├── FunctionCall: input
-        │   ├── FunctionCall: println
-        │   │   ├── StringLiteral: "Enter the width of the rectangle:"
-        │   ├── VariableDeclaration
-        │   │   ├── Type: width
-        │   │   ├── Identifier: W
-        │   │   ├── Assignment
-        │   │   │   ├── FunctionCall: input
-        │   ├── Assignment
-        │   │   ├── Identifier: ARectangle
-        │   │   ├── FunctionCall
-        │   │   │   ├── Identifier: areaOf
-        │   │   │   ├── Identifier: Rectangle
-        │   │   │   ├── Arguments: L, W
-        │   ├── FunctionCall: println
-        │   │   ├── StringLiteral: "The area of the rectangle is {ARectangle} square meters."
-        └── ConditionalStatement: else if
-            ├── Condition
-            │   ├── Identifier: choice
-            │   ├── Operator: ==
-            │   ├── Number: 3
-            ├── Block
-            │   ├── FunctionCall: println
-            │   │   ├── StringLiteral: "Enter the base length of the triangle:"
-            │   ├── VariableDeclaration
-            │   │   ├── Type: base
-            │   │   ├── Identifier: B
-            │   │   ├── Assignment
-            │   │   │   ├── FunctionCall: input
-            │   ├── FunctionCall: println
-            │   │   ├── StringLiteral: "Enter the height of the triangle:"
-            │   ├── VariableDeclaration
-            │   │   ├── Type: height
-            │   │   ├── Identifier: H
-            │   │   ├── Assignment
-            │   │   │   ├── FunctionCall: input
-            │   ├── Assignment
-            │   │   ├── Identifier: ATriangle
-            │   │   ├── FunctionCall
-            │   │   │   ├── Identifier: areaOf
-            │   │   │   ├── Identifier: triangle
-            │   │   │   ├── Arguments: H, B
-            │   ├── FunctionCall: println
-            │   │   ├── StringLiteral: "The area of the triangle is {ATriangle} square meters."
-            └── ConditionalStatement: else if
-                ├── Condition
-                │   ├── Identifier: choice
-                │   ├── Operator: ==
-                │   ├── Number: 4
-                ├── Block
-                │   ├── FunctionCall: println
-                │   │   ├── StringLiteral: "Exiting the program."
-                └── ConditionalStatement: else
-                    ├── Block
-                    │   ├── FunctionCall: println
-                    │   │   ├── StringLiteral: "Invalid choice. Please select a valid option."
-
+----------- Tokens Table ------------
++-----------------------------------------------+---------------------+
+|                     Lexeme                    | Token Specification |
++-----------------------------------------------+---------------------+
+|                 without error                 |       COMMENT       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       1                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|      Enter the side length of the square:     |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                      side                     |    RESERVED_WORD    |
+|                       S                       |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    ASqauare                   |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                     square                    |    RESERVED_WORD    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|           The area of the square is           |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                    ASqauare                   |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       2                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the length of the rectangle:      |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     length                    |    RESERVED_WORD    |
+|                       L                       |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the width of the rectangle:       |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     width                     |    RESERVED_WORD    |
+|                       W                       |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                   ARectangle                  |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                   Rectangle                   |      IDENTIFIER     |
+|                       (                       |    L_PARENTHESIS    |
+|                       L                       |      IDENTIFIER     |
+|                       ,                       |  SEPARATING_SYMBOL  |
+|                       W                       |      IDENTIFIER     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|         The area of the rectangle is          |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                   ARectangle                  |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       3                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|     Enter the base length of the triangle:    |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                      base                     |    RESERVED_WORD    |
+|                       B                       |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|       Enter the height of the triangle:       |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                     height                    |    RESERVED_WORD    |
+|                       H                       |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     input                     |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                   ATriangle                   |      IDENTIFIER     |
+|                       =                       |      ASSIGN_OP      |
+|                     areaOf                    |    RESERVED_WORD    |
+|                       .                       |   ACCESSOR_SYMBOL   |
+|                    triangle                   |    RESERVED_WORD    |
+|                       (                       |    L_PARENTHESIS    |
+|                       H                       |      IDENTIFIER     |
+|                       ,                       |  SEPARATING_SYMBOL  |
+|                       B                       |      IDENTIFIER     |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|          The area of the triangle is          |    STRING_LITERAL   |
+|                       {                       |     PARENTHESIS     |
+|                   ATriangle                   |      IDENTIFIER     |
+|                       }                       |     PARENTHESIS     |
+|                 square meters.                |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       if                      |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|                     choice                    |      IDENTIFIER     |
+|                       ==                      |       EQUAL_TO      |
+|                       4                       |       INTEGER       |
+|                       )                       |    R_PARENTHESIS    |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+|              Exiting the program.             |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
+|                      else                     |       KEYWORD       |
+|                       {                       |       L_CURLY       |
+|                    println                    |       KEYWORD       |
+|                       (                       |    L_PARENTHESIS    |
+| Invalid choice. Please select a valid option. |    STRING_LITERAL   |
+|                       )                       |    R_PARENTHESIS    |
+|                       ;                       |      SEMICOLON      |
+|                       }                       |       R_CURLY       |
++-----------------------------------------------+---------------------+
 
 ----------- Errors Table ------------
 No errors found.

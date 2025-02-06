@@ -71,6 +71,14 @@ class Error:
         result = f'{self.error_name}: {self.details}\n'
         result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}, column {self.pos_start.col + 1}-{self.pos_end.col + 1}'
         return result
+    
+    def get_location(self):
+        if self.pos_start and self.pos_end:
+            return f"Line {self.pos_start.ln + 1}, Column {self.pos_start.col + 1}-{self.pos_end.col + 1}"
+        elif self.pos_start:
+            return f"Line {self.pos_start.ln + 1}, Column {self.pos_start.col + 1}"
+        return "Unknown"
+
 
 class IllegalCharError(Error):
     def __init__(self, pos_start, pos_end, illegal_char):
@@ -123,9 +131,10 @@ class Token:
         self.pos_end = pos_end
 
     def __repr__(self):
-        if self.value:
-            return f'{self.type}: {self.value}'
-        return f'{self.type}'
+        if self.type == "ERROR":
+            return f'ErrorToken: {self.value}'
+        return f'{self.type}: {self.value}'
+
 
 #######################################
 #               LEXER                 #
@@ -149,66 +158,69 @@ class Lexer:
         errors = []
 
         while self.current_char is not None:
-            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
+            pos_start = self.pos.copy()
+
+            if self.current_char in WHITESPACE:
                 self.advance()
-
-            elif self.current_char in CONSTANTS.keys():  
-                const_value = self.match_constant()
-                if const_value:
-                    tokens.append(Token(CONSTANTS[const_value], const_value))
-                    continue
-
-            elif self.current_char == '#': 
-                comment_token = self.make_comment()
-                if isinstance(comment_token, Error):
-                    errors.append(comment_token)
-                else:
-                    tokens.append(comment_token)
-
-            elif self.current_char in SYMBOLS:  
-                token_or_error = self.make_symbol()
-                if isinstance(token_or_error, Error):
-                    errors.append(token_or_error)
-                else:
-                    tokens.append(token_or_error)
+                continue
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 token_or_error = self.make_number()
                 if isinstance(token_or_error, Error):
-                    errors.append(token_or_error)
+                    errors.append(token_or_error)  # ✅ Store errors separately
                 else:
+                    token_or_error.pos_start = pos_start
+                    token_or_error.pos_end = self.pos.copy()
                     tokens.append(token_or_error)
+                continue
 
-            elif self.current_char in ALPHABETS or self.current_char == '_':  
+            elif self.current_char in ALPHABETS or self.current_char == '_':
                 token_or_tokens = self.make_identifier_or_keyword()
-                if isinstance(token_or_tokens, list): 
-                    tokens.extend(token_or_tokens)  
+                if isinstance(token_or_tokens, list):
+                    for token in token_or_tokens:
+                        token.pos_start = pos_start
+                        token.pos_end = self.pos.copy()
+                    tokens.extend(token_or_tokens)
                 elif isinstance(token_or_tokens, Error):
-                    errors.append(token_or_tokens)
+                    errors.append(token_or_tokens)  # ✅ Store errors separately
                 else:
+                    token_or_tokens.pos_start = pos_start
+                    token_or_tokens.pos_end = self.pos.copy()
                     tokens.append(token_or_tokens)
+                continue
 
-            elif self.current_char == '"':  
+            elif self.current_char == '"':
                 tokens_or_error = self.make_string()
-                if isinstance(tokens_or_error, Error): 
-                    errors.append(tokens_or_error)
+                if isinstance(tokens_or_error, Error):
+                    errors.append(tokens_or_error)  # ✅ Store errors separately
                 else:
-                    tokens.extend(tokens_or_error)  
+                    for token in tokens_or_error:
+                        token.pos_start = pos_start
+                        token.pos_end = self.pos.copy()
+                    tokens.extend(tokens_or_error)
+                continue
 
-            elif self.current_char == "'":  
+            elif self.current_char == "'":
                 token_or_error = self.make_character()
                 if isinstance(token_or_error, Error):
-                    errors.append(token_or_error)
+                    errors.append(token_or_error)  # ✅ Store errors separately
                 else:
+                    token_or_error.pos_start = pos_start
+                    token_or_error.pos_end = self.pos.copy()
                     tokens.append(token_or_error)
+                continue
 
-            else: 
-                pos_start = self.pos.copy()
-                char = self.current_char
+            else:
+                if self.current_char in [';', '(', ')', '{', '}', '=']:
+                    tokens.append(Token("SYMBOL", self.current_char, pos_start, self.pos.copy()))
+                else:
+                    errors.append(IllegalCharError(pos_start, self.pos, self.current_char))
                 self.advance()
-                errors.append(IllegalCharError(pos_start, self.pos, char))
 
-        return tokens, errors
+
+
+        return tokens, errors  # ✅ Ensure tokens and errors are returned separately
+
 
     def match_constant(self):
         """Matches predefined constants."""
@@ -330,60 +342,68 @@ class Lexer:
         errors = []
 
         while self.current_char is not None:
-            if self.current_char in WHITESPACE or (self.current_char == '\\' and self.peek() in 'tnv'):
+            pos_start = self.pos.copy()  # Ensure we track position
+
+            if self.current_char in WHITESPACE:
                 self.advance()
-
-            elif self.current_char == '#':
-                comment_token = self.make_comment()
-                if isinstance(comment_token, Error):
-                    errors.append(comment_token)
-                else:
-                    tokens.append(comment_token)
-
-            elif self.current_char in SYMBOLS:
-                token_or_error = self.make_symbol()
-                if isinstance(token_or_error, Error):
-                    errors.append(token_or_error)
-                else:
-                    tokens.append(token_or_error)
+                continue
 
             elif self.current_char in DIGITS or (self.current_char == '-' and self.is_negative_sign()):
                 token_or_error = self.make_number()
                 if isinstance(token_or_error, Error):
                     errors.append(token_or_error)
                 else:
+                    token_or_error.pos_start = pos_start
+                    token_or_error.pos_end = self.pos.copy()
                     tokens.append(token_or_error)
+                continue
 
             elif self.current_char in ALPHABETS or self.current_char == '_':
                 token_or_tokens = self.make_identifier_or_keyword()
                 if isinstance(token_or_tokens, list):
+                    for token in token_or_tokens:
+                        token.pos_start = pos_start
+                        token.pos_end = self.pos.copy()
                     tokens.extend(token_or_tokens)
                 elif isinstance(token_or_tokens, Error):
                     errors.append(token_or_tokens)
                 else:
+                    token_or_tokens.pos_start = pos_start
+                    token_or_tokens.pos_end = self.pos.copy()
                     tokens.append(token_or_tokens)
+                continue
 
             elif self.current_char == '"':
-                tokens_or_error = self.make_string()  
-                if isinstance(tokens_or_error, Error): 
+                tokens_or_error = self.make_string()
+                if isinstance(tokens_or_error, Error):
                     errors.append(tokens_or_error)
                 else:
-                    tokens.extend(tokens_or_error) 
+                    for token in tokens_or_error:
+                        token.pos_start = pos_start
+                        token.pos_end = self.pos.copy()
+                    tokens.extend(tokens_or_error)
+                continue
 
             elif self.current_char == "'":
-                token = self.make_character()
-                if isinstance(token, Error):
-                    errors.append(token)
+                token_or_error = self.make_character()
+                if isinstance(token_or_error, Error):
+                    errors.append(token_or_error)
                 else:
-                    tokens.append(token)
+                    token_or_error.pos_start = pos_start
+                    token_or_error.pos_end = self.pos.copy()
+                    tokens.append(token_or_error)
+                continue
 
             else:
-                pos_start = self.pos.copy()
-                char = self.current_char
+                if self.current_char in [';', '(', ')', '{', '}', '=']:
+                    tokens.append(Token("SYMBOL", self.current_char, pos_start, self.pos.copy()))
+                else:
+                    errors.append(IllegalCharError(pos_start, self.pos, self.current_char))
                 self.advance()
-                errors.append(IllegalCharError(pos_start, self.pos, char))
 
         return tokens, errors
+
+
     
     def make_string(self):
         str_val = ''

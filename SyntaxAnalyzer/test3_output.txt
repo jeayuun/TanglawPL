@@ -1,5 +1,6 @@
 --------------- Input ---------------
-int num = 'M';
+int num = 'M';  
+println("Value: {num}";
 
 
 ----------- Abstract Syntax Tree (AST) ------------
@@ -9,11 +10,19 @@ int num = 'M';
     │   ├── Identifier: num
     │   ├── Assignment
     │   │   ├── ErrorNode: Invalid Literal 'M'
+    ├── FunctionCall
+    │   ├── Identifier: println
+    │   ├── StringLiteral
+    │   │   ├── Text: "Value: "
+    │   │   ├── EmbeddedExpression
+    │   │   │   ├── Identifier: num
+    │   ├── ErrorNode: Missing closing parenthesis
 
 
 ----------- Errors Table ------------
-+--------------------+--------------------------------+-------------------+
-|     Error Type     |             Details            |      Location     |
-+--------------------+--------------------------------+-------------------+
-| Invalid Assignment | 'M' is not a valid int literal | Line 1, Column 11 |
-+--------------------+--------------------------------+-------------------+
++----------------------+----------------------------------+-------------------+
+|      Error Type      |            Details               |      Location     |
++----------------------+----------------------------------+-------------------+
+| Invalid Assignment   | 'M' is not a valid int literal   | Line 1, Column 11 |
+| Syntax Error         |  Missing closing parenthesis     | Line 2, Column 26 |
++----------------------+----------------------------------+-------------------+
