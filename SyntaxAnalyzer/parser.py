@@ -1,10 +1,12 @@
 from tokenizer import Lexer, Token
 
 class ASTNode:
-    def __init__(self, type_, value=None, children=None):
+    def __init__(self, type_, value=None, children=None, pos_start=None, pos_end=None):
         self.type = type_
         self.value = value
         self.children = children or []
+        self.pos_start = pos_start  # Track start position
+        self.pos_end = pos_end      # Track end position
 
     def __repr__(self, level=0, is_last=True):
         indent = "    " * level
@@ -15,7 +17,10 @@ class ASTNode:
         for i, child in enumerate(self.children):
             ret += child.__repr__(level + 1, is_last=(i == len(self.children) - 1))
         return ret
-    
+
+###########################################
+#            ERROR HANDLER                #
+###########################################
 
 class ParserError(Exception):
     def __init__(self, pos_start, pos_end, error_name, details):
@@ -24,6 +29,7 @@ class ParserError(Exception):
         self.error_name = error_name
         self.details = details
 
+    #method that will report where the errors line is
     def get_location(self):
         if self.pos_start and self.pos_end:
             return f"Line {self.pos_start.ln + 1}, Column {self.pos_start.col + 1}-{self.pos_end.col + 1}"
@@ -39,6 +45,15 @@ class UnexpectedTokenError(ParserError):
     def __init__(self, pos_start, pos_end, details="Unexpected token"):
         super().__init__(pos_start, pos_end, "Unexpected Token", details)
 
+#error handling stuff
+class TypeError(ParserError):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, "Type Mismatch", details)
+    
+##################################
+#            PARSER              #
+##################################
+
 class ReplacementFieldNode(ASTNode):
     def __init__(self, identifier):
         super().__init__(type_="ReplacementField", value=identifier)
@@ -51,7 +66,6 @@ class OutputStatementNode(ASTNode):
     def __init__(self, parts):
         super().__init__(type_="OutputStatement", children=parts)
         self.parts = parts  # Redundant but kept for clarity
-    
 
 class Parser:
     def __init__(self, tokens):
@@ -59,41 +73,59 @@ class Parser:
         self.current_token = None
         self.pos = -1
         self.had_error = False
+        self.syntax_errors = []  # Initialize syntax_errors list
+        self.previous_token = None  # Track previous token
         self.advance()
 
-    def synchronize(self):
-        while self.current_token and self.current_token.type not in [
-            'SEMICOLON', 'R_CURLY', 'KEYWORD', 'DATA_TYPE', 'EOF'
-        ]:
-            self.advance()
-        self.had_error = False
-
     def advance(self):
-        self.pos += 1
-        if self.pos < len(self.tokens):
-            self.current_token = self.tokens[self.pos]
-        else:
-            self.current_token = None
-
+            self.pos += 1
+            if self.pos < len(self.tokens):
+                self.current_token = self.tokens[self.pos]
+            else:
+                self.current_token = None
+                
     def parse(self):
-        if not self.tokens:
-            return "Syntax Error: No tokens provided for parsing."
-
-        try:
-            ast = self.program()
-            if self.current_token is not None:
-                return f"Syntax Error: Unexpected token '{self.current_token.type}' at Line {self.current_token.pos_start.ln + 1}, Column {self.current_token.pos_start.col + 1}"
-            return ast  # If no error, return the AST
-        except ParserError as e:
-            return e.as_string()  # Return formatted syntax error
-        except Exception as e:
-            return f"Unexpected Parsing Error: {str(e)}"  # Catch unexpected errors
+        self.had_error = False
+        ast = self.program()
+        # Check for unexpected tokens at the end (if recovery left some)
+        if self.current_token is not None and self.current_token.type != 'EOF':
+            self.syntax_errors.append({
+                "Error Type": "Unexpected Token",
+                "Details": f"Unexpected token: {self.current_token.type}",
+                "Location": self.current_token.pos_start.get_location() if self.current_token.pos_start else "Unknown"
+            })
+            
+        
+        # Return AST only if no errors were flagged.
+        return ast if not self.syntax_errors else None
+        
 
     def program(self):
         statements = []
         while self.current_token is not None and self.current_token.type != 'EOF':
-            statements.append(self.statement())
+            try:
+                statements.append(self.statement())
+            except ParserError as e:
+                # Add error to syntax_errors list
+                self.syntax_errors.append({
+                    "Error Type": e.error_name,
+                    "Details": e.details,
+                    "Location": e.get_location()
+                })
+                # Recover by synchronizing to the next statement
+                self.synchronize()
         return ASTNode(type_="Program", children=statements)
+    
+    def synchronize(self):
+        # Skip tokens until a statement boundary is found (e.g., ';', '}', or keywords)
+        while self.current_token is not None:
+            if self.current_token.type in ('SEMICOLON', 'R_CURLY'):
+                self.advance()
+                break
+            # Check if the next token is a statement starter (e.g., 'if', 'while', etc.)
+            if self.current_token.type in ('KEYWORD', 'DATA_TYPE', 'IDENTIFIER'):
+                break
+            self.advance()
 
     def statement(self):
         if self.current_token.type == 'DATA_TYPE':
@@ -123,23 +155,43 @@ class Parser:
     def declaration(self, expect_semicolon=True):
         # First token is the data type
         data_type = self.current_token.value
+        data_type_pos = self.current_token.pos_start  # Track data type position
         self.advance()
         declarators = []
+
         while True:
             # Expect a variable name (identifier)
             identifier_token = self.expect('IDENTIFIER', "Expected variable name")
             identifier_value = identifier_token.value
-
+    
             # NEW: Check for a unit specifier immediately after the identifier.
             unit = None
             if self.current_token and self.current_token.type == 'L_PARENTHESIS':
                 unit = self.parse_unit_specifier()
 
+            #error handler
             initializer = None
             if self.current_token and self.current_token.type == 'ASSIGN_OP':
                 self.advance()
                 initializer = self.expr()
 
+                # Type Checking Logic
+                if initializer.type == "Literal" or initializer.type == "CHAR_LITERAL":
+                    if data_type == 'int':
+                        if initializer.type == "CHAR_LITERAL" or not isinstance(initializer.value, (int, float)):
+                            raise TypeError(
+                                initializer.pos_start,
+                                initializer.pos_end,
+                                f"Cannot assign {initializer.value} of type '{initializer.value.__class__.__name__}' to '{data_type}'"
+                            )
+                    elif data_type == 'char':
+                        if initializer.type != "CHAR_LITERAL" and not isinstance(initializer.value, str):
+                            raise TypeError(
+                                initializer.pos_start,
+                                initializer.pos_end,
+                                f"Cannot assign {initializer.value} of type '{initializer.value.__class__.__name__}' to '{data_type}'"
+                            )
+                
             # Create a Declarator node.
             declarator_node = ASTNode(type_="Declarator", value=identifier_value)
             if unit:
@@ -154,9 +206,16 @@ class Parser:
             else:
                 break
 
+        #error hadnler
         if expect_semicolon:
             self.expect('SEMICOLON', "Expected ';' after declaration")
-        return ASTNode(type_="VariableDeclaration", value=data_type, children=declarators)
+        return ASTNode(
+            type_="VariableDeclaration",
+            value=data_type,
+            children=declarators,
+            pos_start=data_type_pos,
+            pos_end=self.current_token.pos_end if self.current_token else data_type_pos
+        )
 
 
     def parse_unit_specifier(self):
@@ -662,6 +721,19 @@ class Parser:
     def factor(self):   
         token = self.current_token
 
+        #error handler
+        if token.type in ('INTEGER', 'FLOAT', 'STRING_LITERAL', 'CHAR_LITERAL'):
+            # Capture position before advancing
+            pos_start = token.pos_start
+            pos_end = token.pos_end
+            self.advance()
+            return ASTNode(
+                type_="Literal",
+                value=token.value,
+                pos_start=pos_start,
+                pos_end=pos_end
+            )
+
         # Handle built-in or function call: if an identifier is immediately followed by '('
         if token.type in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
             nxt = self.peek()
@@ -782,7 +854,7 @@ class Parser:
         self.current_token = self.tokenizer.get_next_token()
 
 
-from prettytable import PrettyTable
+#from prettytable import PrettyTable
 
 def run_parser(input_text):
     lexer = Lexer("input", input_text)
