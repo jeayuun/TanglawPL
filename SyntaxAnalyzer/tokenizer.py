@@ -700,7 +700,7 @@ class Lexer:
 #                RUN                  #
 #######################################
 
-# from prettytable import PrettyTable 
+from prettytable import PrettyTable 
 
 
 def run(fn, text):
