@@ -432,6 +432,9 @@ class Parser:
         return identifier
 
     def parse_member_access(self):
+        unit_specifiers = ('cm', 'ft', 'in', 'kg', 'km', 'l', 'lbs', 'm', 'mg', 'mm', 'sq')
+        geometric_words = ('areaOf', 'volumeOf', 'perimeterOf')
+
         # Accept tokens if type is IDENTIFIER, KEYWORD, or RESERVED_WORD.
         if self.current_token.type in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
             token = self.current_token
@@ -439,10 +442,19 @@ class Parser:
         else:
             raise UnexpectedTokenError(
                 self.current_token.pos_start if self.current_token else None,
-                self.current_token.pos_end if self.current_token else None,
+                self.current_token.pos_end if self.current_token else None, 
                 "Expected identifier"
             )
-        current_node = ASTNode(type_="Identifier", value=token.value)
+        
+        # dito ung line na inaayos ko
+        if token.value in unit_specifiers:
+            current_node = ASTNode(type_="UnitSpecifier", value=token.value)
+        elif token.value in geometric_words:
+            current_node = ASTNode(type_="Geometric", value=token.value)
+        elif token.value == 'input':
+            current_node = ASTNode(type_="Function", value=token.value)
+        else:
+            current_node = ASTNode(type_="Identifier", value=token.value)
         while self.current_token and self.current_token.type == 'ACCESSOR_SYMBOL':
             self.advance()  # Consume the '.' token
             if self.current_token.type not in ('IDENTIFIER', 'KEYWORD', 'RESERVED_WORD'):
