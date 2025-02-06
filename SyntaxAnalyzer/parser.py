@@ -42,8 +42,8 @@ class ParserError(Exception):
         return f"Syntax Error: {self.error_name}\n{location}\nDetails: {self.details}"
 
 class UnexpectedTokenError(ParserError):
-    def __init__(self, pos_start, pos_end, details="Unexpected token"):
-        super().__init__(pos_start, pos_end, "Unexpected Token", details)
+    def __init__(self, pos_start, pos_end, details="Syntax Error"):
+        super().__init__(pos_start, pos_end, "Syntax Error", details)
 
 #error handling stuff
 class TypeError(ParserError):

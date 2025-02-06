@@ -69,7 +69,6 @@ def process_file(filename):
             else:
                 output_file.write("AST generation failed due to syntax errors.\n")
         
-            #syntax errors
             output_file.write("\n----------- Syntax Analyzer Errors ------------\n")
             if parser_instance and parser_instance.syntax_errors:  # Check instance's errors
                 syntax_error_table = PrettyTable()

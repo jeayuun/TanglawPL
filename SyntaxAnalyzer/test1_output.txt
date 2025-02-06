@@ -1,0 +1,157 @@
+--------------- Input ---------------
+
+   println("Enter the side length of the square:");
+   side S = input();
+  
+   ASqauare = areaOf.square;
+  
+   println("The area of the square is {ASqauare} square meters.");
+
+   
+   println("Enter the length of the rectangle:");
+   length L = input();
+  
+   
+   println("Enter the width of the rectangle:");
+   width W = input();
+ 
+   ARectangle = areaOf.Rectangle (L,W);
+  
+   
+   println("The area of the rectangle is {ARectangle} square meters.");
+
+
+   println("Enter the base length of the triangle:");
+   base B= input();
+  
+   println("Enter the height of the triangle:");
+   height H= input();
+  
+   ATriangle = areaOf.triangle(H,B);
+  
+   println("The area of the triangle is {ATriangle} square meters.");
+
+
+----------- Tokens Table ------------
++----------------------------------------+---------------------+
+|                 Lexeme                 | Token Specification |
++----------------------------------------+---------------------+
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|  Enter the side length of the square:  |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                  side                  |    RESERVED_WORD    |
+|                   S                    |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 input                  |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                ASqauare                |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 areaOf                 |    RESERVED_WORD    |
+|                   .                    |   ACCESSOR_SYMBOL   |
+|                 square                 |    RESERVED_WORD    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|       The area of the square is        |    STRING_LITERAL   |
+|                   {                    |      L_REPFIELD     |
+|                ASqauare                |      IDENTIFIER     |
+|                   }                    |      R_REPFIELD     |
+|             square meters.             |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|   Enter the length of the rectangle:   |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                 length                 |    RESERVED_WORD    |
+|                   L                    |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 input                  |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|   Enter the width of the rectangle:    |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                 width                  |    RESERVED_WORD    |
+|                   W                    |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 input                  |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|               ARectangle               |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 areaOf                 |    RESERVED_WORD    |
+|                   .                    |   ACCESSOR_SYMBOL   |
+|               Rectangle                |      IDENTIFIER     |
+|                   (                    |    L_PARENTHESIS    |
+|                   L                    |      IDENTIFIER     |
+|                   ,                    |  SEPARATING_SYMBOL  |
+|                   W                    |      IDENTIFIER     |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|     The area of the rectangle is       |    STRING_LITERAL   |
+|                   {                    |      L_REPFIELD     |
+|               ARectangle               |      IDENTIFIER     |
+|                   }                    |      R_REPFIELD     |
+|             square meters.             |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+| Enter the base length of the triangle: |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                  base                  |    RESERVED_WORD    |
+|                   B                    |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 input                  |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|   Enter the height of the triangle:    |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                 height                 |    RESERVED_WORD    |
+|                   H                    |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 input                  |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|               ATriangle                |      IDENTIFIER     |
+|                   =                    |      ASSIGN_OP      |
+|                 areaOf                 |    RESERVED_WORD    |
+|                   .                    |   ACCESSOR_SYMBOL   |
+|                triangle                |    RESERVED_WORD    |
+|                   (                    |    L_PARENTHESIS    |
+|                   H                    |      IDENTIFIER     |
+|                   ,                    |  SEPARATING_SYMBOL  |
+|                   B                    |      IDENTIFIER     |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
+|                println                 |       KEYWORD       |
+|                   (                    |    L_PARENTHESIS    |
+|      The area of the triangle is       |    STRING_LITERAL   |
+|                   {                    |      L_REPFIELD     |
+|               ATriangle                |      IDENTIFIER     |
+|                   }                    |      R_REPFIELD     |
+|             square meters.             |    STRING_LITERAL   |
+|                   )                    |    R_PARENTHESIS    |
+|                   ;                    |      SEMICOLON      |
++----------------------------------------+---------------------+
+
+----------- Errors Table ------------
+No errors found.

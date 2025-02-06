@@ -1,6 +1,7 @@
 --------------- Input ---------------
 mynumber = input()
-double converted_num(m) = mynumber (cm);;
+double converted_num(m) = mynumber (cm)
+double converted_num(m) = mynumber (cm);
 
 ----------- Tokens Table ------------
 +---------------+---------------------+
@@ -21,7 +22,16 @@ double converted_num(m) = mynumber (cm);;
 |       (       |    L_PARENTHESIS    |
 |       cm      |    RESERVED_WORD    |
 |       )       |    R_PARENTHESIS    |
-|       ;       |      SEMICOLON      |
+|     double    |      DATA_TYPE      |
+| converted_num |      IDENTIFIER     |
+|       (       |    L_PARENTHESIS    |
+|       m       |    RESERVED_WORD    |
+|       )       |    R_PARENTHESIS    |
+|       =       |      ASSIGN_OP      |
+|    mynumber   |      IDENTIFIER     |
+|       (       |    L_PARENTHESIS    |
+|       cm      |    RESERVED_WORD    |
+|       )       |    R_PARENTHESIS    |
 |       ;       |      SEMICOLON      |
 +---------------+---------------------+
 
