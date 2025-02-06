@@ -784,7 +784,7 @@ class Parser:
         self.current_token = self.tokenizer.get_next_token()
 
 
-#from prettytable import PrettyTable
+from prettytable import PrettyTable
 
 def run_parser(input_text):
     lexer = Lexer("input", input_text)

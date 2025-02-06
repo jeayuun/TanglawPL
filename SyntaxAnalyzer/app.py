@@ -23,9 +23,15 @@ def process_file(filename):
 
         # Parse tokens and generate AST
         ast = None
+        syntax_error = None  # To store syntax error message
         if not errors:
             parser_instance = parser.Parser(tokens)  # Assuming your parser class is named `Parser`
-            ast = parser_instance.parse()  # Generate AST
+            try:
+                ast = parser_instance.parse()  # Generate AST
+            except parser.ParserError as e:
+                syntax_error = e.as_string()  # Capture syntax error message
+            except Exception as e:
+                syntax_error = str(e)  # Catch unexpected errors
 
         output_filename = downloads_folder / filename.replace('.lit', '_output.txt')
 
@@ -65,9 +71,12 @@ def process_file(filename):
             if ast:
                 output_file.write(ast.__repr__() + "\n")  # This will print the AST
                 output_file.write("Correct syntax, Output is Valid.\n")
+            elif syntax_error:
+                output_file.write("Syntax Error Detected:\n")
+                output_file.write(syntax_error + "\n")
             else:
                 output_file.write("AST generation failed due to syntax errors.\n")
-
+        
         print(f"\nOutput saved to {output_filename}")
 
     except UnicodeDecodeError as e:
